@@ -9,7 +9,8 @@ sin backend y con datos de mentira.
 | Página | Qué es |
 |---|---|
 | `index.html` | Web del restaurante (comensal) con el widget de chat de reservas abajo a la derecha. |
-| `panel.html` | Panel del dueño, mobile-first: reservas del día por turnos + mesas + cuadro de mando + generador de mensaje para el cliente. |
+| `reserva.html` | Página de reserva suelta: solo el chat, a pantalla completa. Es lo que abre el QR. |
+| `panel.html` | Panel del dueño, mobile-first: reservas del día por turnos + mesas + cuadro de mando, generador de mensaje para el cliente y su enlace de reservas con QR. |
 
 ## Qué es de mentira
 
@@ -28,14 +29,24 @@ sin backend y con datos de mentira.
 
 ```
 index.html
+reserva.html
 panel.html
 assets/
   css/base.css     tokens compartidos (color, tipografía, espaciado, motion)
-  css/site.css     web del comensal + widget de chat
+  css/site.css     web del comensal + widget de chat + página de reserva
   css/panel.css    panel del dueño
-  js/chat.js       conversación guionizada de reserva
+  js/chat.js       conversación guionizada de reserva (widget y página)
   js/panel.js      estado en memoria, cuadro de mando, reservas y mesas
+  js/qr.js         generador de QR propio, sin dependencias
 ```
+
+`reserva.html` reutiliza `chat.js`: el mismo guion y el mismo calendario que el
+widget del index, pero con `data-modo="pagina"` en el contenedor, que arranca la
+conversación sola y quita el botón flotante y el de cerrar.
+
+`qr.js` es un codificador de QR mínimo escrito para la demo (modo byte, nivel de
+corrección M, versiones 1 a 6). No usa CDN: el QR se pinta aunque el móvil no
+tenga cobertura.
 
 ## Diseño
 

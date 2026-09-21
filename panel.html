@@ -96,6 +96,30 @@
     </form>
   </section>
 
+  <!-- Enlace de reservas -------------------------------------------------- -->
+  <section class="view" id="v-enlace" aria-labelledby="t-enlace" hidden>
+    <h1 id="t-enlace">Tu enlace de reservas</h1>
+    <p class="view__lead">
+      Pon este QR en las mesas, la carta o la puerta; o el enlace en tu bio de
+      Instagram, Google y WhatsApp. Sin tocar tu web.
+    </p>
+
+    <figure class="qr">
+      <div class="qr__lienzo" id="qrLienzo"></div>
+      <figcaption class="qr__pie">Apunta a tu página de reservas</figcaption>
+    </figure>
+
+    <div class="enlace">
+      <span class="enlace__url" id="urlReserva"></span>
+      <button class="btn btn--ember" type="button" id="btnCopiarUrl">Copiar</button>
+    </div>
+
+    <div class="enlace__acciones">
+      <a class="btn btn--ghost" href="reserva.html" target="_blank" rel="noopener">Abrir la página de reservas</a>
+      <a class="btn btn--ghost" href="index.html">Ver la web del restaurante</a>
+    </div>
+  </section>
+
 </main>
 
 <nav class="tabbar" aria-label="Secciones del panel">
@@ -113,11 +137,14 @@
     </svg>
     Mesas
   </a>
-  <a href="index.html">
+  <a href="#v-enlace" data-view="v-enlace" aria-label="Tu enlace de reservas">
     <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true">
-      <path d="M3 8.2l6.5-5 6.5 5V15a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 15V8.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      <rect x="2.5" y="2.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/>
+      <rect x="2.5" y="10.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/>
+      <rect x="10.5" y="2.5" width="6" height="6" rx="1.2" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M10.5 11.5h2v2m4 0v3m-6 0h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
     </svg>
-    La web
+    Tu enlace
   </a>
 </nav>
 
@@ -162,6 +189,7 @@
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="assets/js/qr.js"></script>
 <script src="assets/js/panel.js"></script>
 </body>
 </html>
