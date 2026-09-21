@@ -146,6 +146,14 @@ body {
   background: var(--line);
 }
 
+/* En pantallas estrechas el título y el recuento se reparten la línea */
+@media (max-width: 560px) {
+  .turno-h { justify-content: space-between; }
+  .turno-h h2 { font-size: .72rem; letter-spacing: .12em; white-space: nowrap; }
+  .turno-h span { font-size: .72rem; white-space: nowrap; }
+  .turno-h::after { display: none; }
+}
+
 .res {
   padding: var(--s4);
   border: 1px solid var(--line);
@@ -438,8 +446,9 @@ body {
   transition: color var(--fast) var(--ease-out);
 }
 
-.tabbar a[aria-current="page"] { color: var(--ember); }
 .tabbar a:hover { color: var(--text); }
+.tabbar a[aria-current="page"],
+.tabbar a[aria-current="page"]:hover { color: var(--ember); }
 
 /* Aviso flotante --------------------------------------------------------- */
 
