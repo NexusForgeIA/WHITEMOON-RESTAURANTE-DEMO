@@ -32,7 +32,34 @@
     { id: 109, nombre: 'Rosa Iglesias',   personas: 4, hora: '21:30', turno: 'cena',   mesa: 6,    estado: 'cancelada',  origen: 'Teléfono',     nota: 'Avisa de que le ha surgido un viaje', tel: '600 00 00 09', email: '' }
   ];
 
+  /* Los días se calculan en carga y relativos a hoy, para que la demo siempre
+     tenga reservas en el día de hoy, mañana y un par de días sueltos. */
+  var REPARTO_DIAS = { 101: 0, 102: 0, 103: 0, 105: 0, 109: 0, 104: 1, 106: 1, 107: 2, 108: 6 };
+
+  function diaDesplazado(saltos) {
+    var d = new Date();
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + saltos);
+    return d;
+  }
+
+  function claveDia(d) {
+    var mes = d.getMonth() + 1;
+    var dia = d.getDate();
+    return d.getFullYear() + '-' + (mes < 10 ? '0' : '') + mes + '-' + (dia < 10 ? '0' : '') + dia;
+  }
+
+  function diaDesdeClave(clave) {
+    var trozos = clave.split('-');
+    return new Date(Number(trozos[0]), Number(trozos[1]) - 1, Number(trozos[2]));
+  }
+
+  reservas.forEach(function (r) {
+    r.fecha = claveDia(diaDesplazado(REPARTO_DIAS[r.id] || 0));
+  });
+
   var filtro = 'todo';
+  var diaSel = claveDia(diaDesplazado(0));
   var editando = null;   /* id de la mesa que se está editando */
   var proximoIdMesa = 9;
 
@@ -81,13 +108,18 @@
 
   /* --- cálculos ---------------------------------------------------------- */
 
-  function activas() {
-    return reservas.filter(function (r) { return r.estado !== 'cancelada'; });
+  function reservasDelDia() {
+    return reservas.filter(function (r) { return r.fecha === diaSel; });
   }
 
-  function mesasOcupadas() {
+  function activas() {
+    return reservasDelDia().filter(function (r) { return r.estado !== 'cancelada'; });
+  }
+
+  /* Sin lista, mira todas las reservas: es lo que necesita la vista de Mesas */
+  function mesasOcupadas(lista) {
     var ids = {};
-    reservas.forEach(function (r) {
+    (lista || reservas).forEach(function (r) {
       if (r.estado === 'sentada' && r.mesa) ids[r.mesa] = true;
     });
     return ids;
@@ -103,7 +135,7 @@
   function pintarKpis() {
     var act = activas();
     var comensales = act.reduce(function (t, r) { return t + r.personas; }, 0);
-    var ocupadas = Object.keys(mesasOcupadas()).length;
+    var ocupadas = Object.keys(mesasOcupadas(reservasDelDia())).length;
 
     $('#kpiReservas').textContent   = act.length;
     $('#kpiComensales').textContent = comensales;
@@ -172,7 +204,9 @@
     var h = el('div', 'turno-h');
     h.appendChild(el('h2', null, titulo));
     var pax = lista.reduce(function (t, r) { return r.estado === 'cancelada' ? t : t + r.personas; }, 0);
-    h.appendChild(el('span', null, lista.length + ' reservas · ' + pax + ' comensales'));
+    h.appendChild(el('span', null,
+      lista.length + (lista.length === 1 ? ' reserva · ' : ' reservas · ') +
+      pax + (pax === 1 ? ' comensal' : ' comensales')));
     frag.appendChild(h);
 
     if (!lista.length) {
@@ -191,8 +225,15 @@
   function pintarReservas() {
     listaReservas.innerHTML = '';
 
-    var comida = reservas.filter(function (r) { return r.turno === 'comida'; });
-    var cena   = reservas.filter(function (r) { return r.turno === 'cena'; });
+    var delDia = reservasDelDia();
+
+    if (!delDia.length) {
+      listaReservas.appendChild(el('p', 'vacio', 'Ninguna reserva este día.'));
+      return;
+    }
+
+    var comida = delDia.filter(function (r) { return r.turno === 'comida'; });
+    var cena   = delDia.filter(function (r) { return r.turno === 'cena'; });
 
     if (filtro !== 'cena')   listaReservas.appendChild(bloqueTurno('Turno de comida', comida));
     if (filtro !== 'comida') listaReservas.appendChild(bloqueTurno('Turno de cena', cena));
@@ -382,13 +423,13 @@
   var PLANTILLAS = {
     confirmacion: function (r) {
       return 'Hola ' + r.nombre + ', tu reserva en Restaurante La Brasa para ' +
-             r.personas + ' personas el ' + fechaMensaje() + ' a las ' + r.hora +
+             r.personas + ' personas el ' + fechaMensaje(r) + ' a las ' + r.hora +
              ' está confirmada. ¡Te esperamos! Si necesitas cambiar algo, ' +
              'responde a este mensaje.';
     },
     recordatorio: function (r) {
       return 'Hola ' + r.nombre + ', te recordamos tu reserva en La Brasa el ' +
-             fechaMensaje() + ' a las ' + r.hora + ' para ' + r.personas +
+             fechaMensaje(r) + ' a las ' + r.hora + ' para ' + r.personas +
              ' personas. Si no pudieras venir, avísanos por favor. ¡Gracias!';
     }
   };
@@ -411,8 +452,14 @@
   var copiarTimer = null;
   var abiertaEn = 0;
 
-  function fechaMensaje() {
-    return fechaDeHoy().replace(/ (\d+) /, ' $1 de ');
+  var MESES_LARGOS = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+                      'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  var DIAS_LARGOS  = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+  /* La fecha del mensaje es la de esa reserva, no la de hoy */
+  function fechaMensaje(r) {
+    var d = r && r.fecha ? diaDesdeClave(r.fecha) : new Date();
+    return DIAS_LARGOS[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES_LARGOS[d.getMonth()];
   }
 
   function componerMensaje(r, tipo) {
@@ -708,6 +755,56 @@
     }
   }
 
+  /* --- selector de día ------------------------------------------------------
+     Cambia el día que enseña el cuadro de reservas. Sigue todo en memoria.
+     -------------------------------------------------------------------- */
+
+  var DIAS_CORTOS  = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+  var MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul',
+                      'ago', 'sep', 'oct', 'nov', 'dic'];
+
+  var etiquetaDia = $('#diaEtiqueta');
+  var entradaDia  = $('#diaInput');
+
+  function diaBonito(clave) {
+    var d = diaDesdeClave(clave);
+    var corto = DIAS_CORTOS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES_CORTOS[d.getMonth()];
+    return clave === claveDia(diaDesplazado(0)) ? 'Hoy · ' + corto : corto;
+  }
+
+  function irADia(clave) {
+    diaSel = clave;
+    entradaDia.value = clave;
+    etiquetaDia.textContent = diaBonito(clave);
+
+    Array.prototype.forEach.call(document.querySelectorAll('.dias__chip'), function (b) {
+      b.setAttribute('aria-pressed', String(clave === claveDia(diaDesplazado(Number(b.dataset.salto)))));
+    });
+
+    pintarKpis();
+    pintarReservas();
+  }
+
+  function moverDia(saltos) {
+    var d = diaDesdeClave(diaSel);
+    d.setDate(d.getDate() + saltos);
+    irADia(claveDia(d));
+  }
+
+  $('#diaAnterior').addEventListener('click', function () { moverDia(-1); });
+  $('#diaSiguiente').addEventListener('click', function () { moverDia(1); });
+
+  Array.prototype.forEach.call(document.querySelectorAll('.dias__chip'), function (b) {
+    b.addEventListener('click', function () {
+      irADia(claveDia(diaDesplazado(Number(b.dataset.salto))));
+    });
+  });
+
+  entradaDia.addEventListener('change', function () {
+    if (entradaDia.value) irADia(entradaDia.value);
+    else irADia(diaSel);                    /* si lo vacían, se queda donde estaba */
+  });
+
   /* --- filtros y navegación ------------------------------------------------ */
 
   Array.prototype.forEach.call(document.querySelectorAll('#filtros button'), function (b) {
@@ -753,5 +850,6 @@
 
   $('#hoyFecha').textContent = fechaDeHoy();
   pintarEnlace();
+  irADia(diaSel);
   pintar();
 })();

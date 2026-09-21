@@ -34,6 +34,28 @@
     <h1 id="t-reservas">Reservas de hoy</h1>
     <p class="view__lead">Toca una reserva para cambiar su estado. Se guarda solo en esta pantalla.</p>
 
+    <div class="dias" role="group" aria-label="Día del cuadro de reservas">
+      <div class="dias__nav">
+        <button class="dias__flecha" type="button" id="diaAnterior" aria-label="Día anterior">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M9.5 3L5 8l4.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <p class="dias__etiqueta" id="diaEtiqueta" aria-live="polite"></p>
+        <button class="dias__flecha" type="button" id="diaSiguiente" aria-label="Día siguiente">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6.5 3L11 8l-4.5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="dias__atajos">
+        <button class="dias__chip" type="button" data-salto="0" aria-pressed="true">Hoy</button>
+        <button class="dias__chip" type="button" data-salto="1" aria-pressed="false">Mañana</button>
+        <label class="sr-only" for="diaInput">Ir a una fecha</label>
+        <input class="dias__fecha" type="date" id="diaInput">
+      </div>
+    </div>
+
     <div class="kpis">
       <div class="kpi">
         <span class="kpi__n" id="kpiReservas">0</span>
