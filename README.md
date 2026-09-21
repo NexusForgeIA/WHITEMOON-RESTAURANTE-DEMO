@@ -1,6 +1,6 @@
 # WHITEMOON-RESTAURANTE-DEMO
 
-Demo visual de **reservas de restaurante con IA + panel del dueño en el móvil**.
+Demo visual de **reservas de restaurante + panel del dueño en el móvil**.
 Pensada para enseñar en hostelería. Solo frontend: HTML/CSS/JS puro, sin frameworks,
 sin backend y con datos de mentira.
 
@@ -16,10 +16,10 @@ sin backend y con datos de mentira.
 
 - **Restaurante La Brasa** es un negocio ficticio. Dirección, teléfono, carta y
   reservas son datos de ejemplo. Ambas páginas van con `noindex`.
-- El chat **lleva IA de verdad**: `assets/js/chat.js` solo conversa y manda el
-  historial a la edge function `restaurante-chat`. Preguntar lo que falta,
-  mirar el aforo y crear la reserva lo hace el backend, que responde con el
-  texto y, cuando la cierra, con los datos de la reserva.
+- El chat **no conversa ni lleva IA**: `assets/js/chat.js` es un reservador
+  guiado por pasos (día, turno, hora, zona, personas y datos). Solo se escriben
+  el nombre y el teléfono. Al confirmar llama a `crear_reserva` de la edge
+  function `reservas-mt`, así que la reserva se guarda de verdad.
 - El panel ya no inventa nada: lee y escribe contra la edge function
   `reservas-mt` (reservas, mesas y configuración del tenant `demo-restaurante`).
   Pide una clave al entrar, que se guarda en `sessionStorage`; en la demo es
