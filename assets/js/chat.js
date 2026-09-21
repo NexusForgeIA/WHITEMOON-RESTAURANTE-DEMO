@@ -18,7 +18,11 @@
   if (!panel || !log) return;
 
   var DIAS  = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
-  var MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  var DOWS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];   /* el calendario empieza en lunes */
+  var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
+               'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+  var CERRADO = 1;   /* getDay() del lunes: el restaurante descansa */
 
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -29,13 +33,16 @@
 
   /* --- utilidades ------------------------------------------------------- */
 
-  function etiquetaFecha(offset) {
+  function hoySinHora() {
     var d = new Date();
-    d.setDate(d.getDate() + offset);
-    return {
-      corta: DIAS[d.getDay()] + ' ' + d.getDate() + ' ' + MESES[d.getMonth()],
-      esLunes: d.getDay() === 1
-    };
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }
+
+  /* "viernes 25 de septiembre" — con año solo si no es el actual */
+  function etiquetaFecha(d) {
+    var txt = DIAS[d.getDay()] + ' ' + d.getDate() + ' de ' + MESES[d.getMonth()];
+    return d.getFullYear() === new Date().getFullYear() ? txt : txt + ' de ' + d.getFullYear();
   }
 
   function scrollLog() {
@@ -81,9 +88,15 @@
 
   /* --- controles del pie ------------------------------------------------ */
 
-  function pintarChips(opciones) {
-    form.hidden = true;
+  /* Deja el pie en blanco: quita chips, calendario y formulario */
+  function vaciarPie() {
     chips.innerHTML = '';
+    chips.classList.remove('chips--cal');
+    form.hidden = true;
+  }
+
+  function pintarChips(opciones) {
+    vaciarPie();
     opciones.forEach(function (op) {
       var b = document.createElement('button');
       b.type = 'button';
@@ -91,7 +104,7 @@
       b.textContent = op.texto;
       b.addEventListener('click', function () {
         burbuja(op.texto, 'user');
-        chips.innerHTML = '';
+        vaciarPie();
         op.accion(op);
       });
       chips.appendChild(b);
@@ -100,7 +113,7 @@
   }
 
   function pedirTexto(placeholder, etiqueta, onValor) {
-    chips.innerHTML = '';
+    vaciarPie();
     form.hidden = false;
     input.value = '';
     input.placeholder = placeholder;
@@ -120,8 +133,7 @@
   }
 
   function botonReiniciar() {
-    chips.innerHTML = '';
-    form.hidden = true;
+    vaciarPie();
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'chat__restart';
@@ -169,32 +181,135 @@
 
   function preguntarDia() {
     paso = 1;
-    var hoy     = etiquetaFecha(0);
-    var manana  = etiquetaFecha(1);
-    var pasado  = etiquetaFecha(2);
-
-    bot(['¿Qué día quieres venir?'], function () {
-      pintarChips([
-        { texto: 'Hoy, ' + hoy.corta,       lunes: hoy.esLunes,    accion: elegirDia },
-        { texto: 'Mañana, ' + manana.corta, lunes: manana.esLunes, accion: elegirDia },
-        { texto: pasado.corta,              lunes: pasado.esLunes, accion: elegirDia },
-        { texto: 'Otro día', accion: function () {
-            pedirTexto('Ej.: viernes 12', 'Día de la reserva', function (valor) {
-              reserva.dia = valor;
-              preguntarPersonas();
-            });
-          }
-        }
-      ]);
-    });
+    bot(['¿Qué día quieres venir? Los lunes cerramos.'], pintarCalendario);
   }
 
-  function elegirDia(op) {
-    if (op.lunes) {
-      bot(['Los lunes cerramos por descanso. ¿Lo dejamos para otro día?'], preguntarDia);
-      return;
+  /* --- calendario -------------------------------------------------------- */
+
+  /* Mini-calendario mensual. Se puede elegir cualquier día futuro que no sea
+     lunes; lo pasado y los lunes quedan deshabilitados. */
+  function pintarCalendario() {
+    vaciarPie();
+    chips.classList.add('chips--cal');
+
+    var hoy = hoySinHora();
+    var visible = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+    var cal = document.createElement('div');
+    cal.className = 'cal';
+    cal.setAttribute('role', 'group');
+    cal.setAttribute('aria-label', 'Elegir la fecha de la reserva');
+
+    var cabecera = document.createElement('div');
+    cabecera.className = 'cal__head';
+
+    var anterior = botonMes('anterior', 'M9.5 3L5 8l4.5 5');
+    var titulo   = document.createElement('p');
+    var siguiente = botonMes('siguiente', 'M6.5 3L11 8l-4.5 5');
+
+    titulo.className = 'cal__title';
+    titulo.setAttribute('aria-live', 'polite');
+
+    cabecera.appendChild(anterior);
+    cabecera.appendChild(titulo);
+    cabecera.appendChild(siguiente);
+    cal.appendChild(cabecera);
+
+    var semana = document.createElement('div');
+    semana.className = 'cal__dows';
+    semana.setAttribute('aria-hidden', 'true');
+    DOWS.forEach(function (d) {
+      var s = document.createElement('span');
+      s.textContent = d;
+      semana.appendChild(s);
+    });
+    cal.appendChild(semana);
+
+    var rejilla = document.createElement('div');
+    rejilla.className = 'cal__grid';
+    cal.appendChild(rejilla);
+
+    var nota = document.createElement('p');
+    nota.className = 'cal__note';
+    nota.textContent = 'En gris, los días que no se pueden reservar.';
+    cal.appendChild(nota);
+
+    anterior.addEventListener('click', function () { moverMes(-1); });
+    siguiente.addEventListener('click', function () { moverMes(1); });
+
+    function moverMes(paso) {
+      visible = new Date(visible.getFullYear(), visible.getMonth() + paso, 1);
+      pintarMes();
     }
-    reserva.dia = op.texto.replace('Hoy, ', 'hoy, ').replace('Mañana, ', 'mañana, ');
+
+    function pintarMes() {
+      titulo.textContent = MESES[visible.getMonth()] + ' ' + visible.getFullYear();
+
+      /* Nunca se retrocede por debajo del mes en curso */
+      anterior.disabled = visible.getFullYear() === hoy.getFullYear() &&
+                          visible.getMonth() === hoy.getMonth();
+
+      rejilla.innerHTML = '';
+
+      /* Los huecos previos alinean el 1 con su día de la semana (lunes primero) */
+      var primero = new Date(visible.getFullYear(), visible.getMonth(), 1);
+      var hueco = (primero.getDay() + 6) % 7;
+      var total = new Date(visible.getFullYear(), visible.getMonth() + 1, 0).getDate();
+      var i;
+
+      for (i = 0; i < hueco; i++) {
+        var vacio = document.createElement('span');
+        vacio.className = 'cal__blank';
+        vacio.setAttribute('aria-hidden', 'true');
+        rejilla.appendChild(vacio);
+      }
+
+      for (i = 1; i <= total; i++) {
+        rejilla.appendChild(celdaDia(new Date(visible.getFullYear(), visible.getMonth(), i), hoy));
+      }
+    }
+
+    pintarMes();
+    chips.appendChild(cal);
+    scrollLog();
+  }
+
+  function botonMes(sentido, trazo) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'cal__nav';
+    b.setAttribute('aria-label', 'Mes ' + sentido);
+    b.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">' +
+                  '<path d="' + trazo + '" stroke="currentColor" stroke-width="1.6" ' +
+                  'stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    return b;
+  }
+
+  function celdaDia(fecha, hoy) {
+    var b = document.createElement('button');
+    var pasado = fecha < hoy;
+    var lunes  = fecha.getDay() === CERRADO;
+
+    b.type = 'button';
+    b.className = 'cal__day';
+    b.textContent = fecha.getDate();
+
+    if (pasado || lunes) {
+      b.disabled = true;
+      b.setAttribute('aria-label', etiquetaFecha(fecha) + (lunes ? ', cerrado' : ', ya pasó'));
+      return b;
+    }
+
+    if (fecha.getTime() === hoy.getTime()) b.classList.add('is-hoy');
+    b.setAttribute('aria-label', etiquetaFecha(fecha));
+    b.addEventListener('click', function () { elegirDia(fecha); });
+    return b;
+  }
+
+  function elegirDia(fecha) {
+    reserva.dia = etiquetaFecha(fecha);
+    burbuja(reserva.dia, 'user');
+    vaciarPie();
     preguntarPersonas();
   }
 
