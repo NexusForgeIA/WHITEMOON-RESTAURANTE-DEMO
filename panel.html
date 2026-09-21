@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Panel · Restaurante La Brasa (demo WhiteMoon)</title>
+<meta name="description" content="Panel del dueño de un restaurante: reservas del día por turnos y gestión de mesas. Demo de WhiteMoon con datos de ejemplo.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08080d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/panel.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Saltar al contenido</a>
+
+<header class="p-head">
+  <div class="p-wrap">
+    <div class="p-head__row">
+      <span class="p-head__mark">La <em>Brasa</em></span>
+      <span class="p-head__date tnum" id="hoyFecha"></span>
+    </div>
+    <span class="demo-tag">Demo — datos de ejemplo</span>
+  </div>
+</header>
+
+<main id="main" class="p-wrap">
+
+  <!-- Reservas ---------------------------------------------------------- -->
+  <section class="view" id="v-reservas" aria-labelledby="t-reservas">
+    <h1 id="t-reservas">Reservas de hoy</h1>
+    <p class="view__lead">Toca una reserva para cambiar su estado. Se guarda solo en esta pantalla.</p>
+
+    <div class="kpis">
+      <div class="kpi">
+        <span class="kpi__n" id="kpiReservas">0</span>
+        <span class="kpi__l">Reservas<br>hoy</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi__n" id="kpiComensales">0</span>
+        <span class="kpi__l">Comensales<br>esperados</span>
+      </div>
+      <div class="kpi">
+        <span class="kpi__n" id="kpiMesas">0</span>
+        <span class="kpi__l">Mesas<br>libres</span>
+      </div>
+    </div>
+
+    <div class="seg" id="filtros" role="group" aria-label="Filtrar por turno">
+      <button type="button" data-turno="todo" aria-pressed="true">Todo el día</button>
+      <button type="button" data-turno="comida" aria-pressed="false">Comida</button>
+      <button type="button" data-turno="cena" aria-pressed="false">Cena</button>
+    </div>
+
+    <div id="listaReservas"></div>
+  </section>
+
+  <!-- Mesas -------------------------------------------------------------- -->
+  <section class="view" id="v-mesas" aria-labelledby="t-mesas" hidden>
+    <h1 id="t-mesas">Mesas</h1>
+    <p class="view__lead">Las mesas en ámbar están ocupadas ahora mismo.</p>
+
+    <div id="listaMesas"></div>
+
+    <button class="add-toggle" type="button" id="addToggle" aria-expanded="false" aria-controls="addForm">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+        <path d="M7.5 2v11M2 7.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      Añadir mesa
+    </button>
+
+    <form class="mesa-form" id="addForm" hidden>
+      <div class="mesa-form__grid">
+        <div class="field">
+          <label for="addZona">Zona</label>
+          <select id="addZona">
+            <option>Sala</option>
+            <option>Ventana</option>
+            <option>Terraza</option>
+            <option>Sala de abajo</option>
+            <option>Barra</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="addCap">Capacidad</label>
+          <input id="addCap" type="number" min="1" max="20" step="1" value="4" inputmode="numeric">
+        </div>
+      </div>
+      <div class="mesa-form__row">
+        <button class="btn btn--ember" type="submit">Guardar mesa</button>
+        <button class="btn btn--ghost" type="button" id="addCancel">Cancelar</button>
+      </div>
+    </form>
+  </section>
+
+</main>
+
+<nav class="tabbar" aria-label="Secciones del panel">
+  <a href="#v-reservas" data-view="v-reservas" aria-current="page">
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true">
+      <rect x="2.5" y="3.5" width="14" height="13" rx="2.5" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M2.5 7.5h14M6.5 2v3M12.5 2v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    Reservas
+  </a>
+  <a href="#v-mesas" data-view="v-mesas">
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true">
+      <circle cx="9.5" cy="9.5" r="5" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M9.5 2v2.5M9.5 14.5V17M2 9.5h2.5M14.5 9.5H17" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    Mesas
+  </a>
+  <a href="index.html">
+    <svg width="19" height="19" viewBox="0 0 19 19" fill="none" aria-hidden="true">
+      <path d="M3 8.2l6.5-5 6.5 5V15a1.5 1.5 0 01-1.5 1.5h-10A1.5 1.5 0 013 15V8.2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+    </svg>
+    La web
+  </a>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/js/panel.js"></script>
+</body>
+</html>
