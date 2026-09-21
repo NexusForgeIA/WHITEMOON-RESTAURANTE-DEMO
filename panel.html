@@ -121,6 +121,45 @@
   </a>
 </nav>
 
+<!-- Mensaje para el cliente ------------------------------------------------ -->
+
+<div class="sheet-back" id="sheetBack" hidden></div>
+
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <header class="sheet__head">
+    <div>
+      <p class="sheet__title" id="sheetTitle">Mensaje para el cliente</p>
+      <p class="sheet__sub" id="sheetSub"></p>
+    </div>
+    <button class="icon-btn" type="button" id="sheetClose" aria-label="Cerrar el mensaje">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M3.5 3.5l9 9m0-9l-9 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="sheet__body">
+    <div class="seg" id="plantillas" role="group" aria-label="Plantilla del mensaje">
+      <button type="button" data-tpl="confirmacion" aria-pressed="true">Confirmación</button>
+      <button type="button" data-tpl="recordatorio" aria-pressed="false">Recordatorio</button>
+    </div>
+
+    <label class="sr-only" for="sheetTexto">Texto del mensaje</label>
+    <textarea class="sheet__texto" id="sheetTexto" rows="7" spellcheck="true"></textarea>
+
+    <p class="sheet__nota">
+      Puedes editarlo antes de mandarlo. Demo: no se envía nada solo, se abre
+      WhatsApp o el correo con el texto puesto.
+    </p>
+  </div>
+
+  <footer class="sheet__foot">
+    <button class="btn btn--ghost" type="button" id="btnCopiar">Copiar</button>
+    <button class="btn btn--ghost" type="button" id="btnMail">Email</button>
+    <button class="btn btn--ember" type="button" id="btnWa">WhatsApp</button>
+  </footer>
+</section>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/panel.js"></script>
