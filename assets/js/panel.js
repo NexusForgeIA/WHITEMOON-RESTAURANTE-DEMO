@@ -190,9 +190,13 @@
     who.appendChild(el('p', 'res__nombre', r.cliente_nombre || 'Sin nombre'));
 
     var mesa = mesaPorId(r.mesa_id);
+
+    /* Sin mesa asignada todavía, se enseña la zona que pidió el cliente */
+    var sitio = mesa ? mesa.nombre + ' (' + mesa.zona + ')'
+              : (r.zona_preferida ? r.zona_preferida + ' (pedida)' : 'Sin mesa asignada');
+
     var meta = r.personas + (r.personas === 1 ? ' persona' : ' personas') +
-               ' · ' + (mesa ? mesa.nombre + ' (' + mesa.zona + ')' : 'Sin mesa asignada') +
-               ' · ' + (r.origen || 'panel');
+               ' · ' + sitio + ' · ' + (r.origen || 'panel');
     who.appendChild(el('p', 'res__meta', meta));
 
     if (r.notas) who.appendChild(el('p', 'res__nota', r.notas));
