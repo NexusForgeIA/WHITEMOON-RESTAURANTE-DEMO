@@ -80,6 +80,7 @@ body {
 
 .kpi__l {
   display: block;
+  min-height: 2.6em;          /* dos líneas: cuadra el rótulo de una con los de dos */
   margin-top: .3rem;
   color: var(--muted);
   font-size: .72rem;
