@@ -19,10 +19,11 @@ sin backend y con datos de mentira.
 - El chat **no lleva IA**: es un guion fijo en `assets/js/chat.js`. Lo que sí es
   real es el final: al cerrar la reserva llama a la edge function `reservas-mt`
   con el token público `demo-restaurante`, así que la reserva se guarda.
-- El panel guarda el estado en variables JS. Al recargar vuelven los datos demo.
-  No se usa `localStorage`.
-- Los teléfonos (`600 00 00 0X`) y los correos (`@example.com`) de las reservas
-  son inventados. El generador de mensaje no envía nada: copia el texto o abre
+- El panel ya no inventa nada: lee y escribe contra la edge function
+  `reservas-mt` (reservas, mesas y configuración del tenant `demo-restaurante`).
+  Pide una clave al entrar, que se guarda en `sessionStorage`; en la demo es
+  `demo`. En un cliente real eso sería login de Supabase Auth en dominio propio.
+- El generador de mensaje no envía nada por su cuenta: copia el texto o abre
   wa.me / el cliente de correo para que decida el encargado.
 - La carta no lleva precios.
 

@@ -23,7 +23,7 @@
       <span class="p-head__mark">La <em>Brasa</em></span>
       <span class="p-head__date tnum" id="hoyFecha"></span>
     </div>
-    <span class="demo-tag">Demo — datos de ejemplo</span>
+    <span class="demo-tag">Demo · datos reales</span>
   </div>
 </header>
 
@@ -32,7 +32,7 @@
   <!-- Reservas ---------------------------------------------------------- -->
   <section class="view" id="v-reservas" aria-labelledby="t-reservas">
     <h1 id="t-reservas">Reservas</h1>
-    <p class="view__lead">Toca una reserva para cambiar su estado. Se guarda solo en esta pantalla.</p>
+    <p class="view__lead">Toca una reserva para cambiar su estado. Se guarda en el restaurante.</p>
 
     <div class="dias" role="group" aria-label="Día del cuadro de reservas">
       <div class="dias__nav">
@@ -78,6 +78,45 @@
     </div>
 
     <div id="listaReservas"></div>
+
+    <button class="add-toggle" type="button" id="altaToggle" aria-expanded="false" aria-controls="altaForm">
+      <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+        <path d="M7.5 2v11M2 7.5h11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+      </svg>
+      Añadir reserva
+    </button>
+
+    <form class="mesa-form" id="altaForm" hidden>
+      <div class="mesa-form__grid">
+        <div class="field">
+          <label for="altaTurno">Turno</label>
+          <select id="altaTurno">
+            <option value="comida">Comida</option>
+            <option value="cena">Cena</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="altaHora">Hora</label>
+          <input id="altaHora" type="time" value="13:30" step="900">
+        </div>
+        <div class="field">
+          <label for="altaPersonas">Personas</label>
+          <input id="altaPersonas" type="number" min="1" max="30" step="1" value="2" inputmode="numeric">
+        </div>
+        <div class="field">
+          <label for="altaTelefono">Teléfono</label>
+          <input id="altaTelefono" type="tel" inputmode="tel" placeholder="600 00 00 00">
+        </div>
+      </div>
+      <div class="field">
+        <label for="altaNombre">Nombre</label>
+        <input id="altaNombre" type="text" placeholder="A nombre de…" autocomplete="off">
+      </div>
+      <div class="mesa-form__row">
+        <button class="btn btn--ember" type="submit">Guardar reserva</button>
+        <button class="btn btn--ghost" type="button" id="altaCancelar">Cancelar</button>
+      </div>
+    </form>
   </section>
 
   <!-- Mesas -------------------------------------------------------------- -->
@@ -225,6 +264,23 @@
   <div class="cartel__qr" id="cartelQr"></div>
   <p class="cartel__url" id="cartelUrl"></p>
   <p class="cartel__pie">Demo de WhiteMoon · restaurante ficticio</p>
+</section>
+
+<section class="acceso" id="acceso" role="dialog" aria-modal="true" aria-labelledby="accesoTitulo" hidden>
+  <form class="acceso__caja" id="accesoForm">
+    <span class="p-head__mark">La <em>Brasa</em></span>
+    <h2 class="acceso__titulo" id="accesoTitulo">Acceso panel</h2>
+    <p class="acceso__lead">Entra con la clave del restaurante para ver las reservas.</p>
+
+    <label class="sr-only" for="accesoClave">Clave del panel</label>
+    <input class="acceso__clave" id="accesoClave" type="password" autocomplete="current-password"
+           placeholder="Clave" autocapitalize="off" spellcheck="false">
+
+    <p class="acceso__error" id="accesoError" role="status" aria-live="polite"></p>
+
+    <button class="btn btn--ember" type="submit">Entrar</button>
+    <p class="acceso__nota">Demo de WhiteMoon · la clave es <code>demo</code></p>
+  </form>
 </section>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>

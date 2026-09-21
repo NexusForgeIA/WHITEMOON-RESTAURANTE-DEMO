@@ -319,6 +319,8 @@ body {
 .badge--pendiente  { background: var(--ember-soft); color: var(--ember); }
 .badge--confirmada { background: var(--ok-soft);    color: var(--ok); }
 .badge--sentada    { background: rgba(255,255,255,.08); color: var(--text); }
+.badge--completada { background: var(--ok-soft);    color: var(--ok); }
+.badge--no_show    { background: var(--danger-soft); color: var(--danger); }
 .badge--cancelada  { background: var(--danger-soft); color: var(--danger); }
 
 .res__acciones {
@@ -855,6 +857,80 @@ body {
   }
 
   .sheet__foot #btnWa { grid-column: auto; }
+}
+
+/* Acceso al panel -------------------------------------------------------- */
+
+.acceso {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-toast);
+  display: grid;
+  place-items: center;
+  padding: var(--s5);
+  background: var(--bg);
+}
+
+.acceso[hidden] { display: none; }
+
+.acceso__caja {
+  display: grid;
+  gap: var(--s3);
+  width: min(100%, 360px);
+  padding: var(--s6) var(--s5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(90% 120% at 10% 0%, rgba(255, 111, 31, .14), transparent 60%),
+    var(--surface);
+  text-align: center;
+}
+
+.acceso__titulo {
+  margin-top: var(--s3);
+  font-size: 1.4rem;
+}
+
+.acceso__lead {
+  color: var(--muted);
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.acceso__clave {
+  width: 100%;
+  min-height: 48px;
+  margin-top: var(--s2);
+  padding: .6rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-pill);
+  background: var(--bg-2);
+  color: var(--text);
+  font-size: 1rem;
+  text-align: center;
+  letter-spacing: .08em;
+}
+
+.acceso__clave:focus { outline: none; border-color: var(--ember); }
+
+.acceso__error {
+  min-height: 1.2em;
+  color: var(--ember);
+  font-size: .82rem;
+}
+
+.acceso__nota {
+  margin-top: var(--s2);
+  color: var(--muted-2);
+  font-size: .76rem;
+}
+
+.acceso__nota code {
+  padding: .1rem .35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .06);
+  color: var(--text);
+  font-size: .95em;
 }
 
 /* Aviso flotante --------------------------------------------------------- */
