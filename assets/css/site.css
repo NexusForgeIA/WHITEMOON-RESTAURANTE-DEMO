@@ -66,6 +66,8 @@
 
 @media (max-width: 760px) {
   .nav__links { display: none; }
+  .brand__kind { display: none; }
+  .nav__tag-full { display: none; }
 }
 
 /* Hero ------------------------------------------------------------------- */
