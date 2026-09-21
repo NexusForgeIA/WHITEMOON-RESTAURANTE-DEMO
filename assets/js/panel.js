@@ -1,40 +1,75 @@
 /* ==========================================================================
-   La Brasa · panel del dueño (DEMO)
-   Todo el estado vive en estas variables. No hay backend ni almacenamiento:
-   al recargar la página vuelven los datos de ejemplo.
+   La Brasa · panel del dueño
+
+   Los datos son reales: reservas, mesas y configuración salen de la edge
+   function reservas-mt y las escrituras vuelven allí. Lo único de demo que
+   queda es el acceso, con una clave sencilla guardada en sessionStorage.
    ========================================================================== */
 
 (function () {
   'use strict';
 
-  /* --- datos de ejemplo -------------------------------------------------- */
+  /* --- backend --------------------------------------------------------------
+     El panel ya no inventa nada: lee y escribe contra la edge function.
+     -------------------------------------------------------------------- */
 
-  var mesas = [
-    { id: 1, zona: 'Ventana',        cap: 2 },
-    { id: 2, zona: 'Ventana',        cap: 2 },
-    { id: 3, zona: 'Sala',           cap: 4 },
-    { id: 4, zona: 'Sala',           cap: 4 },
-    { id: 5, zona: 'Sala',           cap: 6 },
-    { id: 6, zona: 'Terraza',        cap: 4 },
-    { id: 7, zona: 'Sala de abajo',  cap: 8 },
-    { id: 8, zona: 'Barra',          cap: 3 }
-  ];
+  var API   = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/reservas-mt';
+  var TOKEN = 'demo-restaurante';
+  var CLAVE_GUARDADA = 'wm-reservas-clave';
 
-  var reservas = [
-    { id: 101, nombre: 'Marta Ferrer',    personas: 2, hora: '13:30', turno: 'comida', mesa: 1,    estado: 'confirmada', origen: 'Asistente IA', nota: '', tel: '600 00 00 01', email: 'marta@example.com' },
-    { id: 102, nombre: 'Grupo Álvarez',   personas: 6, hora: '13:30', turno: 'comida', mesa: 5,    estado: 'sentada',    origen: 'Teléfono',     nota: 'Comida de empresa, facturan a nombre de la gestoría', tel: '600 00 00 02', email: 'reservas@example.com' },
-    { id: 103, nombre: 'Luis Sanmartín',  personas: 4, hora: '14:30', turno: 'comida', mesa: 3,    estado: 'confirmada', origen: 'Asistente IA', nota: 'Una trona', tel: '600 00 00 03', email: '' },
-    { id: 104, nombre: 'Claudia Rey',     personas: 2, hora: '14:30', turno: 'comida', mesa: null, estado: 'pendiente',  origen: 'Asistente IA', nota: '', tel: '600 00 00 04', email: 'claudia@example.com' },
-    { id: 105, nombre: 'Familia Otero',   personas: 8, hora: '20:30', turno: 'cena',   mesa: 7,    estado: 'confirmada', origen: 'Teléfono',     nota: 'Cumpleaños, traen tarta', tel: '600 00 00 05', email: '' },
-    { id: 106, nombre: 'Íñigo Pardo',     personas: 3, hora: '20:30', turno: 'cena',   mesa: 8,    estado: 'pendiente',  origen: 'Asistente IA', nota: '', tel: '600 00 00 06', email: 'inigo@example.com' },
-    { id: 107, nombre: 'Nuria Casas',     personas: 2, hora: '21:00', turno: 'cena',   mesa: 2,    estado: 'confirmada', origen: 'Asistente IA', nota: 'Sin gluten', tel: '600 00 00 07', email: '' },
-    { id: 108, nombre: 'Pablo Duarte',    personas: 4, hora: '21:30', turno: 'cena',   mesa: 4,    estado: 'pendiente',  origen: 'Asistente IA', nota: '', tel: '600 00 00 08', email: 'pablo@example.com' },
-    { id: 109, nombre: 'Rosa Iglesias',   personas: 4, hora: '21:30', turno: 'cena',   mesa: 6,    estado: 'cancelada',  origen: 'Teléfono',     nota: 'Avisa de que le ha surgido un viaje', tel: '600 00 00 09', email: '' }
-  ];
+  /* La clave del panel vive en sessionStorage. En github.io el almacenamiento
+     es del origen entero (lo comparten todos los repos del usuario), pero aquí
+     es dato de demo y la clave no es un secreto. En un cliente de verdad esto
+     va con login de Supabase Auth y dominio propio. */
+  var panelKey = '';
 
-  /* Los días se calculan en carga y relativos a hoy, para que la demo siempre
-     tenga reservas en el día de hoy, mañana y un par de días sueltos. */
-  var REPARTO_DIAS = { 101: 0, 102: 0, 103: 0, 105: 0, 109: 0, 104: 1, 106: 1, 107: 2, 108: 6 };
+  try {
+    panelKey = window.sessionStorage.getItem(CLAVE_GUARDADA) || '';
+  } catch (e) { panelKey = ''; }
+
+  /* Datos del día que se está mirando, tal y como los manda el servidor */
+  var reservas = [];
+  var mesas = [];
+  var config = {};
+
+  function api(action, extra) {
+    var cuerpo = { token: TOKEN, panel_key: panelKey, action: action };
+
+    for (var k in extra) {
+      if (Object.prototype.hasOwnProperty.call(extra, k)) cuerpo[k] = extra[k];
+    }
+
+    return fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo)
+    }).then(function (r) {
+      if (r.status === 401) {
+        cerrarSesion('La clave ya no vale. Entra otra vez.');
+        return { error: 'no_autorizado', http: 401 };
+      }
+      return r.json().catch(function () { return { error: 'respuesta_ilegible' }; });
+    }).catch(function (e) {
+      /* fetch solo rechaza por red; cualquier otra cosa es un fallo nuestro y
+         no conviene disfrazarlo de "sin conexión" */
+      if (e instanceof TypeError) return { error: 'sin_red' };
+      if (window.console) window.console.error('panel:', action, e);
+      return { error: 'fallo_cliente' };
+    });
+  }
+
+  /* Toda escritura pasa por aquí: avisa del resultado y recarga el día */
+  function escribir(action, extra, mensajeOk) {
+    return api(action, extra).then(function (res) {
+      if (res && res.ok) {
+        if (mensajeOk) aviso(mensajeOk);
+        return cargarDia(diaSel).then(function () { return res; });
+      }
+      if (res && res.error === 'sin_red') aviso('Sin conexión: no se ha guardado');
+      else if (res && res.error !== 'no_autorizado') aviso('No se ha podido guardar');
+      return res;
+    });
+  }
 
   function diaDesplazado(saltos) {
     var d = new Date();
@@ -54,21 +89,21 @@
     return new Date(Number(trozos[0]), Number(trozos[1]) - 1, Number(trozos[2]));
   }
 
-  reservas.forEach(function (r) {
-    r.fecha = claveDia(diaDesplazado(REPARTO_DIAS[r.id] || 0));
-  });
-
   var filtro = 'todo';
   var diaSel = claveDia(diaDesplazado(0));
   var editando = null;   /* id de la mesa que se está editando */
-  var proximoIdMesa = 9;
 
   var ESTADOS = {
     pendiente:  'Pendiente',
     confirmada: 'Confirmada',
     sentada:    'Sentada',
+    completada: 'Completada',
+    no_show:    'No vino',
     cancelada:  'Cancelada'
   };
+
+  /* Ni las canceladas ni las que no vinieron cuentan para el cuadro de mando */
+  var NO_CUENTAN = { cancelada: true, no_show: true };
 
   /* --- atajos del DOM ---------------------------------------------------- */
 
@@ -108,19 +143,20 @@
 
   /* --- cálculos ---------------------------------------------------------- */
 
+  /* El servidor ya manda solo las del día pedido */
   function reservasDelDia() {
-    return reservas.filter(function (r) { return r.fecha === diaSel; });
+    return reservas;
   }
 
   function activas() {
-    return reservasDelDia().filter(function (r) { return r.estado !== 'cancelada'; });
+    return reservas.filter(function (r) { return !NO_CUENTAN[r.estado]; });
   }
 
   /* Sin lista, mira todas las reservas: es lo que necesita la vista de Mesas */
   function mesasOcupadas(lista) {
     var ids = {};
     (lista || reservas).forEach(function (r) {
-      if (r.estado === 'sentada' && r.mesa) ids[r.mesa] = true;
+      if (r.estado === 'sentada' && r.mesa_id) ids[r.mesa_id] = true;
     });
     return ids;
   }
@@ -145,24 +181,24 @@
   /* --- pintado: reservas -------------------------------------------------- */
 
   function tarjetaReserva(r) {
-    var card = el('article', 'res' + (r.estado === 'cancelada' ? ' is-cancelada' : ''));
+    var card = el('article', 'res' + (NO_CUENTAN[r.estado] ? ' is-cancelada' : ''));
 
     var top = el('div', 'res__top');
     top.appendChild(el('span', 'res__hora', r.hora));
 
     var who = el('div', 'res__who');
-    who.appendChild(el('p', 'res__nombre', r.nombre));
+    who.appendChild(el('p', 'res__nombre', r.cliente_nombre || 'Sin nombre'));
 
-    var mesa = mesaPorId(r.mesa);
+    var mesa = mesaPorId(r.mesa_id);
     var meta = r.personas + (r.personas === 1 ? ' persona' : ' personas') +
-               ' · ' + (mesa ? 'Mesa ' + mesa.id + ' (' + mesa.zona + ')' : 'Sin mesa asignada') +
-               ' · ' + r.origen;
+               ' · ' + (mesa ? mesa.nombre + ' (' + mesa.zona + ')' : 'Sin mesa asignada') +
+               ' · ' + (r.origen || 'panel');
     who.appendChild(el('p', 'res__meta', meta));
 
-    if (r.nota) who.appendChild(el('p', 'res__nota', r.nota));
+    if (r.notas) who.appendChild(el('p', 'res__nota', r.notas));
     top.appendChild(who);
 
-    top.appendChild(el('span', 'badge badge--' + r.estado, ESTADOS[r.estado]));
+    top.appendChild(el('span', 'badge badge--' + r.estado, ESTADOS[r.estado] || r.estado));
     card.appendChild(top);
 
     var acciones = el('div', 'res__acciones');
@@ -174,7 +210,7 @@
       var b = el('button', 'act ' + a.clase, a.texto);
       b.type = 'button';
       b.setAttribute('aria-pressed', String(r.estado === a.estado));
-      b.setAttribute('aria-label', a.texto + ' la reserva de ' + r.nombre);
+      b.setAttribute('aria-label', a.texto + ' la reserva de ' + r.cliente_nombre);
       if (r.estado === a.estado) {
         b.disabled = true;
       } else {
@@ -185,10 +221,10 @@
     card.appendChild(acciones);
 
     /* Una reserva cancelada no necesita que le escribamos */
-    if (r.estado !== 'cancelada') {
+    if (!NO_CUENTAN[r.estado]) {
       var msg = el('button', 'res__msg');
       msg.type = 'button';
-      msg.setAttribute('aria-label', 'Escribir a ' + r.nombre);
+      msg.setAttribute('aria-label', 'Escribir a ' + r.cliente_nombre);
       msg.appendChild(svg(ICONO_MENSAJE, 15));
       msg.appendChild(el('span', null, 'Mensaje'));
       msg.addEventListener('click', function () { abrirMensaje(r); });
@@ -203,7 +239,7 @@
 
     var h = el('div', 'turno-h');
     h.appendChild(el('h2', null, titulo));
-    var pax = lista.reduce(function (t, r) { return r.estado === 'cancelada' ? t : t + r.personas; }, 0);
+    var pax = lista.reduce(function (t, r) { return NO_CUENTAN[r.estado] ? t : t + r.personas; }, 0);
     h.appendChild(el('span', null,
       lista.length + (lista.length === 1 ? ' reserva · ' : ' reservas · ') +
       pax + (pax === 1 ? ' comensal' : ' comensales')));
@@ -244,9 +280,8 @@
     reservas.forEach(function (x) { if (x.id === id) r = x; });
     if (!r) return;
 
-    r.estado = estado;
-    pintar();
-    aviso(r.nombre + ' · ' + ESTADOS[estado].toLowerCase());
+    escribir('panel_estado', { id: id, estado: estado },
+             r.cliente_nombre + ' · ' + ESTADOS[estado].toLowerCase());
   }
 
   /* --- pintado: mesas ----------------------------------------------------- */
@@ -255,22 +290,29 @@
   var ICONO_EDITAR  = '<path d="M11.1 2.4l2.5 2.5L6 12.5l-3.2.7.7-3.2 7.6-7.6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>';
   var ICONO_BORRAR  = '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M5 4.5l.6 8.2h4.8L11 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>';
 
+  /* El servidor identifica las mesas por uuid; en el cuadradito va su número */
+  function numeroMesa(m) {
+    var cifras = (m.nombre || '').match(/\d+/);
+    return cifras ? cifras[0] : (m.nombre || '?').slice(0, 2);
+  }
+
   function filaMesa(m, ocupadas) {
     var fila = el('div', 'mesa' + (ocupadas[m.id] ? ' is-ocupada' : ''));
 
-    fila.appendChild(el('span', 'mesa__id', String(m.id)));
+    fila.appendChild(el('span', 'mesa__id', numeroMesa(m)));
 
     var info = el('div', 'mesa__info');
-    info.appendChild(el('p', 'mesa__zona', m.zona));
+    info.appendChild(el('p', 'mesa__zona', m.nombre + ' · ' + m.zona));
     info.appendChild(el('p', 'mesa__cap',
-      m.cap + (m.cap === 1 ? ' comensal' : ' comensales') + ' · ' + (ocupadas[m.id] ? 'ocupada' : 'libre')));
+      m.capacidad + (m.capacidad === 1 ? ' comensal' : ' comensales') +
+      ' · ' + (ocupadas[m.id] ? 'ocupada' : 'libre')));
     fila.appendChild(info);
 
     var tools = el('div', 'mesa__tools');
 
     var edit = el('button', 'icon-btn');
     edit.type = 'button';
-    edit.setAttribute('aria-label', 'Editar la mesa ' + m.id);
+    edit.setAttribute('aria-label', 'Editar la ' + m.nombre);
     edit.appendChild(svg(ICONO_EDITAR, 16));
     edit.addEventListener('click', function () {
       editando = editando === m.id ? null : m.id;
@@ -280,7 +322,7 @@
 
     var del = el('button', 'icon-btn icon-btn--no');
     del.type = 'button';
-    del.setAttribute('aria-label', 'Eliminar la mesa ' + m.id);
+    del.setAttribute('aria-label', 'Eliminar la ' + m.nombre);
     del.appendChild(svg(ICONO_BORRAR, 16));
     del.addEventListener('click', function () { borrarMesa(m.id); });
     tools.appendChild(del);
@@ -299,16 +341,11 @@
     lz.setAttribute('for', 'editZona');
     var sz = el('select');
     sz.id = 'editZona';
-    ['Sala', 'Ventana', 'Terraza', 'Sala de abajo', 'Barra'].forEach(function (z) {
+    zonas(m.zona).forEach(function (z) {
       var o = el('option', null, z);
       if (z === m.zona) o.selected = true;
       sz.appendChild(o);
     });
-    if (['Sala', 'Ventana', 'Terraza', 'Sala de abajo', 'Barra'].indexOf(m.zona) === -1) {
-      var propia = el('option', null, m.zona);
-      propia.selected = true;
-      sz.appendChild(propia);
-    }
     fz.appendChild(lz);
     fz.appendChild(sz);
 
@@ -320,7 +357,7 @@
     ic.type = 'number';
     ic.min = '1';
     ic.max = '20';
-    ic.value = String(m.cap);
+    ic.value = String(m.capacidad);
     ic.inputMode = 'numeric';
     fc.appendChild(lc);
     fc.appendChild(ic);
@@ -342,11 +379,17 @@
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       var cap = parseInt(ic.value, 10);
-      m.zona = sz.value;
-      m.cap = (cap > 0 && cap <= 20) ? cap : m.cap;
+      if (!cap || cap < 1 || cap > 20) {
+        aviso('La capacidad tiene que estar entre 1 y 20');
+        return;
+      }
       editando = null;
-      pintar();
-      aviso('Mesa ' + m.id + ' actualizada');
+      /* Se reenvían activa y orden: si no van, el servidor los deja vacíos y la
+         mesa se descoloca en la lista */
+      escribir('panel_mesa_guardar',
+        { id: m.id, nombre: m.nombre, zona: sz.value, capacidad: cap,
+          activa: m.activa !== false, orden: m.orden },
+        m.nombre + ' actualizada');
     });
 
     return form;
@@ -367,17 +410,19 @@
   }
 
   function borrarMesa(id) {
-    var sueltas = 0;
-    reservas.forEach(function (r) {
-      if (r.mesa === id) { r.mesa = null; sueltas++; }
-    });
-    mesas = mesas.filter(function (m) { return m.id !== id; });
+    var m = mesaPorId(id);
     if (editando === id) editando = null;
+    escribir('panel_mesa_borrar', { id: id }, (m ? m.nombre : 'Mesa') + ' eliminada');
+  }
 
-    pintar();
-    aviso(sueltas
-      ? 'Mesa ' + id + ' eliminada · ' + sueltas + ' reserva(s) sin mesa'
-      : 'Mesa ' + id + ' eliminada');
+  /* Las zonas las manda config; se añade la propia por si no está en la lista */
+  function zonas(actual) {
+    var lista = (config.zonas && config.zonas.length)
+      ? config.zonas.slice()
+      : ['Interior', 'Ventana', 'Terraza', 'Barra'];
+
+    if (actual && lista.indexOf(actual) === -1) lista.push(actual);
+    return lista;
   }
 
   /* --- alta de mesa -------------------------------------------------------- */
@@ -402,16 +447,102 @@
 
   addForm.addEventListener('submit', function (e) {
     e.preventDefault();
+
     var cap = parseInt($('#addCap').value, 10);
     if (!cap || cap < 1 || cap > 20) {
       aviso('La capacidad tiene que estar entre 1 y 20');
       return;
     }
-    mesas.push({ id: proximoIdMesa, zona: $('#addZona').value, cap: cap });
-    aviso('Mesa ' + proximoIdMesa + ' añadida en ' + $('#addZona').value);
-    proximoIdMesa++;
+
+    var nombre = 'Mesa ' + (siguienteNumeroMesa());
     abrirAlta(false);
-    pintar();
+    escribir('panel_mesa_guardar',
+      { nombre: nombre, zona: $('#addZona').value, capacidad: cap, activa: true,
+        orden: mesas.length + 1 },
+      nombre + ' añadida en ' + $('#addZona').value);
+  });
+
+  /* Numera la mesa nueva a partir de las que ya hay */
+  function siguienteNumeroMesa() {
+    var alto = 0;
+    mesas.forEach(function (m) {
+      var n = parseInt(numeroMesa(m), 10);
+      if (n > alto) alto = n;
+    });
+    return alto + 1;
+  }
+
+  /* El desplegable de zonas del alta se rellena con lo que diga config */
+  function pintarZonasAlta() {
+    var sel = $('#addZona');
+    var elegida = sel.value;
+
+    sel.innerHTML = '';
+    zonas('').forEach(function (z) {
+      var o = el('option', null, z);
+      if (z === elegida) o.selected = true;
+      sel.appendChild(o);
+    });
+  }
+
+  /* --- alta manual de reserva ----------------------------------------------
+     La que coge el restaurante por teléfono o en la puerta. Va al día que se
+     esté mirando.
+     -------------------------------------------------------------------- */
+
+  var altaToggle = $('#altaToggle');
+  var altaForm   = $('#altaForm');
+
+  function abrirAltaReserva(abrir) {
+    altaForm.hidden = !abrir;
+    altaToggle.setAttribute('aria-expanded', String(abrir));
+    if (abrir) $('#altaTurno').focus();
+  }
+
+  altaToggle.addEventListener('click', function () {
+    abrirAltaReserva(altaForm.hidden);
+  });
+
+  $('#altaCancelar').addEventListener('click', function () {
+    abrirAltaReserva(false);
+    altaToggle.focus();
+  });
+
+  /* La hora por defecto sigue al turno elegido */
+  $('#altaTurno').addEventListener('change', function () {
+    $('#altaHora').value = this.value === 'cena' ? '20:30' : '13:30';
+  });
+
+  altaForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var nombre   = $('#altaNombre').value.trim();
+    var personas = parseInt($('#altaPersonas').value, 10);
+    var hora     = $('#altaHora').value;
+
+    if (!nombre) { aviso('Ponle un nombre a la reserva'); return; }
+    if (!personas || personas < 1) { aviso('¿Cuántas personas son?'); return; }
+    if (!hora) { aviso('Falta la hora'); return; }
+
+    abrirAltaReserva(false);
+
+    escribir('panel_alta', {
+      fecha: diaSel,
+      turno: $('#altaTurno').value,
+      hora: hora,
+      personas: personas,
+      nombre: nombre,
+      telefono: $('#altaTelefono').value.trim(),
+      origen: 'panel'
+    }, nombre + ' · reserva añadida').then(function (res) {
+      if (res && res.ok) {
+        $('#altaNombre').value = '';
+        $('#altaTelefono').value = '';
+        $('#altaPersonas').value = '2';
+      } else if (res && res.motivo === 'sin_aforo') {
+        aviso('Ese turno está completo');
+      }
+    });
   });
 
   /* --- mensaje al cliente --------------------------------------------------
@@ -422,13 +553,13 @@
 
   var PLANTILLAS = {
     confirmacion: function (r) {
-      return 'Hola ' + r.nombre + ', tu reserva en Restaurante La Brasa para ' +
+      return 'Hola ' + r.cliente_nombre + ', tu reserva en Restaurante La Brasa para ' +
              r.personas + ' personas el ' + fechaMensaje(r) + ' a las ' + r.hora +
              ' está confirmada. ¡Te esperamos! Si necesitas cambiar algo, ' +
              'responde a este mensaje.';
     },
     recordatorio: function (r) {
-      return 'Hola ' + r.nombre + ', te recordamos tu reserva en La Brasa el ' +
+      return 'Hola ' + r.cliente_nombre + ', te recordamos tu reserva en La Brasa el ' +
              fechaMensaje(r) + ' a las ' + r.hora + ' para ' + r.personas +
              ' personas. Si no pudieras venir, avísanos por favor. ¡Gracias!';
     }
@@ -464,9 +595,9 @@
 
   function componerMensaje(r, tipo) {
     var texto = PLANTILLAS[tipo](r);
-    var mesa = mesaPorId(r.mesa);
+    var mesa = mesaPorId(r.mesa_id);
 
-    if (mesa) texto += ' Te guardamos la mesa ' + mesa.id + ' (' + mesa.zona + ').';
+    if (mesa) texto += ' Te guardamos la ' + mesa.nombre + ' (' + mesa.zona + ').';
     if (r.personas > 6) texto += '\n\n' + COLETILLA_GRUPO;
 
     return texto;
@@ -484,7 +615,7 @@
     plantillaActual = 'confirmacion';
     devolverFoco = document.activeElement;
 
-    hojaSub.textContent = r.nombre + ' · ' + r.personas +
+    hojaSub.textContent = r.cliente_nombre + ' · ' + r.personas +
       (r.personas === 1 ? ' persona' : ' personas') + ' · ' + r.hora;
 
     Array.prototype.forEach.call(plantillas, function (b) {
@@ -493,9 +624,11 @@
 
     refrescarTexto();
 
-    btnWa.disabled = !telefonoWa(r.tel);
-    btnMail.disabled = !r.email;
-    btnMail.title = r.email ? 'Escribir a ' + r.email : 'Esta reserva no tiene correo';
+    btnWa.disabled = !telefonoWa(r.cliente_telefono);
+    btnMail.disabled = !r.cliente_email;
+    btnMail.title = r.cliente_email
+      ? 'Escribir a ' + r.cliente_email
+      : 'Esta reserva no tiene correo';
 
     /* La entrada la anima el CSS al quitar [hidden]: nada que temporizar */
     hojaFondo.hidden = false;
@@ -564,14 +697,14 @@
 
   btnWa.addEventListener('click', function () {
     if (!reservaActual) return;
-    var url = 'https://wa.me/' + telefonoWa(reservaActual.tel) +
+    var url = 'https://wa.me/' + telefonoWa(reservaActual.cliente_telefono) +
               '?text=' + encodeURIComponent(hojaTexto.value);
     window.open(url, '_blank', 'noopener');
   });
 
   btnMail.addEventListener('click', function () {
-    if (!reservaActual || !reservaActual.email) return;
-    window.location.href = 'mailto:' + encodeURIComponent(reservaActual.email) +
+    if (!reservaActual || !reservaActual.cliente_email) return;
+    window.location.href = 'mailto:' + encodeURIComponent(reservaActual.cliente_email) +
       '?subject=' + encodeURIComponent(ASUNTO) +
       '&body=' + encodeURIComponent(hojaTexto.value);
   });
@@ -781,8 +914,8 @@
       b.setAttribute('aria-pressed', String(clave === claveDia(diaDesplazado(Number(b.dataset.salto)))));
     });
 
-    pintarKpis();
-    pintarReservas();
+    /* Sin sesión todavía no se pide nada: ya lo hará al entrar */
+    if (panelKey) cargarDia(clave);
   }
 
   function moverDia(saltos) {
@@ -848,8 +981,103 @@
     pintarMesas();
   }
 
+  /* --- carga del día --------------------------------------------------------
+     Una llamada por día: el servidor devuelve reservas, mesas y config.
+     -------------------------------------------------------------------- */
+
+  var cargando = false;
+
+  function cargarDia(fecha) {
+    if (cargando) return Promise.resolve();
+    cargando = true;
+
+    listaReservas.setAttribute('aria-busy', 'true');
+
+    return api('panel_listar', { fecha: fecha }).then(function (res) {
+      cargando = false;
+      listaReservas.removeAttribute('aria-busy');
+
+      if (!res || !res.ok) {
+        if (res && res.error === 'sin_red') aviso('Sin conexión con el restaurante');
+        else if (res && res.error !== 'no_autorizado') aviso('No se han podido cargar las reservas');
+        return res;
+      }
+
+      reservas = res.reservas || [];
+      mesas    = res.mesas || [];
+      config   = res.config || {};
+
+      pintarZonasAlta();
+      pintar();
+      return res;
+    });
+  }
+
+  /* --- acceso al panel ------------------------------------------------------
+     Demo: una clave sencilla que se guarda en sessionStorage. Ver el comentario
+     de arriba sobre por qué aquí vale y en un cliente real no.
+     -------------------------------------------------------------------- */
+
+  var acceso      = $('#acceso');
+  var accesoForm  = $('#accesoForm');
+  var accesoClave = $('#accesoClave');
+  var accesoError = $('#accesoError');
+
+  function pedirClave(motivo) {
+    acceso.hidden = false;
+    accesoError.textContent = motivo || '';
+    accesoClave.value = '';
+    accesoClave.focus();
+  }
+
+  function cerrarSesion(motivo) {
+    panelKey = '';
+    try { window.sessionStorage.removeItem(CLAVE_GUARDADA); } catch (e) {}
+    pedirClave(motivo);
+  }
+
+  function entrar(clave) {
+    panelKey = clave;
+
+    return api('panel_listar', { fecha: diaSel }).then(function (res) {
+      if (res && res.ok) {
+        try { window.sessionStorage.setItem(CLAVE_GUARDADA, clave); } catch (e) {}
+
+        acceso.hidden = true;
+        accesoError.textContent = '';
+
+        reservas = res.reservas || [];
+        mesas    = res.mesas || [];
+        config   = res.config || {};
+
+        pintarZonasAlta();
+        pintar();
+        return true;
+      }
+
+      panelKey = '';
+      if (res && res.error === 'sin_red') accesoError.textContent = 'Sin conexión. Inténtalo otra vez.';
+      else accesoError.textContent = 'Clave incorrecta.';
+      return false;
+    });
+  }
+
+  accesoForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var clave = accesoClave.value.trim();
+    if (!clave) return;
+
+    accesoError.textContent = 'Comprobando…';
+    entrar(clave);
+  });
+
+  /* --- arranque del panel ---------------------------------------------------- */
+
   $('#hoyFecha').textContent = fechaDeHoy();
   pintarEnlace();
   irADia(diaSel);
-  pintar();
+
+  if (panelKey) entrar(panelKey);
+  else pedirClave('');
 })();
