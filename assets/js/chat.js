@@ -27,14 +27,34 @@
 
   var CERRADO = 1;   /* getDay() del lunes: el restaurante descansa */
 
+  /* Backend real: la reserva se guarda de verdad. El guion sigue siendo fijo. */
+  var API   = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/reservas-mt';
+  var TOKEN = 'demo-restaurante';
+  var ESPERA = 12000;
+
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* Estado de la reserva en curso — en memoria, se pierde al recargar */
-  var reserva = { dia: '', personas: '', turno: '', hora: '', nombre: '', telefono: '' };
+  function reservaVacia() {
+    return {
+      dia: '', fechaIso: '',        /* la de texto es para leer; la ISO, para el backend */
+      personas: '', numPersonas: 0,
+      turno: '', turnoClave: '', hora: '',
+      nombre: '', telefono: ''
+    };
+  }
+
+  var reserva = reservaVacia();
   var paso = 0;
   var timers = [];
 
   /* --- utilidades ------------------------------------------------------- */
+
+  function claveIso(d) {
+    var mes = d.getMonth() + 1;
+    var dia = d.getDate();
+    return d.getFullYear() + '-' + (mes < 10 ? '0' : '') + mes + '-' + (dia < 10 ? '0' : '') + dia;
+  }
 
   function hoySinHora() {
     var d = new Date();
@@ -150,7 +170,7 @@
   function arrancar() {
     limpiarTimers();
     log.innerHTML = '';
-    reserva = { dia: '', personas: '', turno: '', hora: '', nombre: '', telefono: '' };
+    reserva = reservaVacia();
     paso = 0;
 
     bot(
@@ -311,9 +331,13 @@
 
   function elegirDia(fecha) {
     reserva.dia = etiquetaFecha(fecha);
+    reserva.fechaIso = claveIso(fecha);
     burbuja(reserva.dia, 'user');
     vaciarPie();
-    preguntarPersonas();
+
+    /* Si venimos de un turno completo ya sabemos quién es: no repreguntamos */
+    if (reserva.nombre && reserva.telefono) preguntarTurno();
+    else preguntarPersonas();
   }
 
   function preguntarPersonas() {
@@ -331,12 +355,14 @@
               if (!n || n < 1) {
                 bot(['No me cuadra ese número. Dime cuántos sois, en cifra.'], function () {
                   pedirTexto('Ej.: 9', 'Número de personas', function (v2) {
-                    reserva.personas = (parseInt(v2.replace(/\D/g, ''), 10) || 8) + ' personas';
+                    reserva.numPersonas = parseInt(v2.replace(/\D/g, ''), 10) || 8;
+                    reserva.personas = reserva.numPersonas + ' personas';
                     avisoGrupo();
                   });
                 });
                 return;
               }
+              reserva.numPersonas = n;
               reserva.personas = n + ' personas';
               if (n > 10) { avisoGrupoGrande(n); return; }
               avisoGrupo();
@@ -348,6 +374,7 @@
   }
 
   function elegirPersonas(op) {
+    reserva.numPersonas = parseInt(op.texto, 10);
     reserva.personas = op.texto + (op.texto === '1' ? ' persona' : ' personas');
     preguntarTurno();
   }
@@ -378,18 +405,54 @@
   function elegirTurno(op) {
     var partes = op.texto.split(' · ');
     reserva.turno = partes[0];
+    reserva.turnoClave = partes[0].toLowerCase();
     reserva.hora  = partes[1];
     paso = 4;
 
-    bot(['Hay hueco. ¿A nombre de quién la pongo?'], function () {
-      pedirTexto('Tu nombre', 'Nombre', function (valor) {
-        if (valor.length < 2) {
-          bot(['Se me ha quedado corto. Dime tu nombre, por favor.'], preguntarNombreOtraVez);
-          return;
-        }
-        reserva.nombre = valor;
-        preguntarTelefono();
+    /* Antes de pedir datos preguntamos al restaurante si queda sitio de verdad */
+    var t = escribiendo();
+    pedirDisponibilidad(function (datos) {
+      t.remove();
+
+      if (datos && datos.disponibles !== null && datos.disponibles !== undefined &&
+          datos.disponibles < reserva.numPersonas) {
+        turnoCompleto(datos.disponibles);
+        return;
+      }
+
+      /* Si ya tenemos nombre y teléfono (venimos de un turno lleno), al grano */
+      if (reserva.nombre && reserva.telefono) {
+        bot(['Ahí sí queda sitio. Te la registro.'], enviarReserva);
+        return;
+      }
+
+      bot(['Hay hueco. ¿A nombre de quién la pongo?'], function () {
+        pedirTexto('Tu nombre', 'Nombre', function (valor) {
+          if (valor.length < 2) {
+            bot(['Se me ha quedado corto. Dime tu nombre, por favor.'], preguntarNombreOtraVez);
+            return;
+          }
+          reserva.nombre = valor;
+          preguntarTelefono();
+        });
       });
+    });
+  }
+
+  /* Ese turno no da para el grupo: se ofrece salida, no se corta la charla */
+  function turnoCompleto(disponibles) {
+    var cuantas = (typeof disponibles === 'number')
+      ? (disponibles > 0 ? ' Solo quedan ' + disponibles + ' plazas.' : ' No queda ni una plaza.')
+      : '';
+
+    bot([
+      'Justo ese turno lo tenemos completo.' + cuantas,
+      '¿Probamos con otro turno o con otro día?'
+    ], function () {
+      pintarChips([
+        { texto: 'Otro turno', accion: preguntarTurno },
+        { texto: 'Otro día',   accion: preguntarDia }
+      ]);
     });
   }
 
@@ -424,11 +487,42 @@
 
   function confirmar() {
     paso = 6;
-    bot(['¡Reserva confirmada!'], function () {
+    bot(['Un segundo, que la registro…'], enviarReserva);
+  }
+
+  function enviarReserva() {
+    var t = escribiendo();
+
+    crearReserva(function (res) {
+      t.remove();
+
+      if (res && res.ok) { reservaGuardada(res); return; }
+      if (res && res.motivo === 'sin_aforo') { turnoCompleto(res.disponibles); return; }
+
+      noSeHaPodido();
+    });
+  }
+
+  function noSeHaPodido() {
+    bot([
+      'No he podido registrarla, inténtalo en un momento.',
+      'Si tienes prisa, llámanos al 910 00 00 00 y la cogemos por teléfono.'
+    ], function () {
+      pintarChips([
+        { texto: 'Probar otra vez', accion: enviarReserva },
+        { texto: 'Lo dejo por ahora', accion: despedir }
+      ]);
+    });
+  }
+
+  function reservaGuardada(res) {
+    var confirmada = res.estado === 'confirmada';
+
+    bot([confirmada ? '¡Reserva confirmada!' : '¡Reserva registrada!'], function () {
       var card = document.createElement('div');
       card.className = 'msg msg--bot msg--card';
       card.innerHTML =
-        '<b>Mesa reservada · La Brasa</b>' +
+        '<b class="js-titulo"></b>' +
         '<dl>' +
           '<dt>Día</dt><dd class="js-dia"></dd>' +
           '<dt>Turno</dt><dd class="js-turno"></dd>' +
@@ -436,6 +530,8 @@
           '<dt>A nombre de</dt><dd class="js-nombre"></dd>' +
           '<dt>Teléfono</dt><dd class="js-tel"></dd>' +
         '</dl>';
+      card.querySelector('.js-titulo').textContent   =
+        (confirmada ? 'Mesa reservada' : 'Reserva registrada') + ' · La Brasa';
       card.querySelector('.js-dia').textContent      = reserva.dia;
       card.querySelector('.js-turno').textContent    = reserva.turno + ' · ' + reserva.hora;
       card.querySelector('.js-personas').textContent = reserva.personas;
@@ -445,10 +541,62 @@
       scrollLog();
 
       bot([
-        'Te aparece ya en el panel del restaurante. Si te surge algo, llámanos y la movemos.',
-        'Esto es una demo: no se ha enviado ningún dato a ninguna parte.'
+        confirmada
+          ? 'Te confirmo la reserva: ya la tienen en el panel del restaurante.'
+          : 'Queda registrada y el restaurante te confirma enseguida.',
+        'Si te surge algo, llámanos y la movemos.'
       ], botonReiniciar);
     });
+  }
+
+  /* --- backend --------------------------------------------------------------
+     Dos llamadas y nada más: mirar si queda sitio y crear la reserva. Si la red
+     falla, el guion lo dice y no canta un éxito que no ha pasado.
+     -------------------------------------------------------------------- */
+
+  function llamar(cuerpo, cuando) {
+    var contestado = false;
+
+    var responder = function (datos) {
+      if (contestado) return;
+      contestado = true;
+      cuando(datos);
+    };
+
+    var reloj = setTimeout(function () { responder(null); }, ESPERA);
+
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(cuerpo)
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (datos) { clearTimeout(reloj); responder(datos); })
+      .catch(function () { clearTimeout(reloj); responder(null); });
+  }
+
+  /* Si no se puede preguntar, seguimos: ya lo dirá el alta */
+  function pedirDisponibilidad(cuando) {
+    llamar({
+      token: TOKEN,
+      action: 'disponibilidad',
+      fecha: reserva.fechaIso,
+      turno: reserva.turnoClave
+    }, cuando);
+  }
+
+  function crearReserva(cuando) {
+    llamar({
+      token: TOKEN,
+      action: 'crear_reserva',
+      fecha: reserva.fechaIso,
+      turno: reserva.turnoClave,
+      hora: reserva.hora,
+      personas: reserva.numPersonas,
+      nombre: reserva.nombre,
+      telefono: reserva.telefono,
+      origen: 'chatbot'
+    }, cuando);
   }
 
   /* --- abrir / cerrar --------------------------------------------------- */

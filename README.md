@@ -16,8 +16,9 @@ sin backend y con datos de mentira.
 
 - **Restaurante La Brasa** es un negocio ficticio. Dirección, teléfono, carta y
   reservas son datos de ejemplo. Ambas páginas van con `noindex`.
-- El chat **no lleva IA**: es un guion fijo en `assets/js/chat.js`. No hay llamadas
-  de red, ni Supabase, ni edge functions, ni tokens.
+- El chat **no lleva IA**: es un guion fijo en `assets/js/chat.js`. Lo que sí es
+  real es el final: al cerrar la reserva llama a la edge function `reservas-mt`
+  con el token público `demo-restaurante`, así que la reserva se guarda.
 - El panel guarda el estado en variables JS. Al recargar vuelven los datos demo.
   No se usa `localStorage`.
 - Los teléfonos (`600 00 00 0X`) y los correos (`@example.com`) de las reservas
