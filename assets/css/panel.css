@@ -497,6 +497,83 @@ body {
   .enlace__acciones { grid-template-columns: 1fr 1fr; }
 }
 
+.enlace__nota {
+  margin-top: var(--s3);
+  color: var(--muted-2);
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
+/* Cartel imprimible ------------------------------------------------------
+   No se ve en pantalla. Al imprimir es lo único que queda, y va en claro:
+   papel blanco, tinta oscura y el QR en negro, que es lo que escanea bien.
+   ---------------------------------------------------------------------- */
+
+.cartel { display: none; }
+
+@media print {
+  @page { size: A5; margin: 12mm; }
+
+  body > *      { display: none !important; }
+  body          { padding: 0; background: #fff; }
+
+  .cartel {
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6mm;
+    min-height: 90vh;
+    color: #111;
+    background: #fff;
+    text-align: center;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cartel__marca {
+    font-size: 11pt;
+    font-weight: 600;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: #444;
+  }
+
+  .cartel__titular {
+    margin: 0;
+    font-size: 30pt;
+    font-weight: 600;
+    letter-spacing: -.03em;
+    line-height: 1.05;
+  }
+
+  .cartel__sub {
+    font-size: 13pt;
+    font-weight: 400;
+    color: #444;
+  }
+
+  .cartel__qr {
+    width: 78mm;
+    padding: 4mm;
+    background: #fff;
+    line-height: 0;
+  }
+
+  .cartel__qr svg { display: block; width: 100%; height: auto; }
+
+  .cartel__url {
+    font-size: 10pt;
+    color: #444;
+    word-break: break-all;
+  }
+
+  .cartel__pie {
+    font-size: 8pt;
+    color: #888;
+  }
+}
+
 /* Vistas y navegación ---------------------------------------------------- */
 
 .view { padding-bottom: var(--s6); }

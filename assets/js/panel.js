@@ -553,9 +553,120 @@
       lienzo.appendChild(el('p', 'qr__fallo', 'No se ha podido pintar el QR. El enlace de abajo sigue valiendo.'));
     }
 
+    /* El cartel imprimible lleva su propio QR: en negro puro sobre blanco,
+       que es lo que se lee bien en papel. */
+    var cartelQr = $('#cartelQr');
+    cartelQr.innerHTML = '';
+    try {
+      cartelQr.appendChild(window.QRDemo.svg(url, {
+        oscuro: '#000000',
+        claro: '#ffffff',
+        etiqueta: 'Código QR para reservar mesa'
+      }));
+    } catch (e) { /* si el QR falla, el cartel sale con la URL a secas */ }
+
+    $('#cartelUrl').textContent = url.replace(/^https?:\/\//, '');
+
     $('#btnCopiarUrl').addEventListener('click', function () {
       copiarTexto(url, $('#btnCopiarUrl'), 'Enlace copiado');
     });
+
+    $('#btnPng').addEventListener('click', function () { descargarPng(url); });
+
+    $('#btnCartel').addEventListener('click', function () {
+      /* El aviso va antes: window.print() bloquea hasta que se cierre */
+      aviso('Elige «Guardar como PDF» en el diálogo');
+      setTimeout(function () { window.print(); }, 60);
+    });
+  }
+
+  /* --- descarga del QR en PNG ----------------------------------------------
+     Se rasteriza el SVG del QR sobre un lienzo de 1024 px, siempre negro sobre
+     blanco: un QR claro sobre fondo oscuro muchos lectores no lo cogen.
+     -------------------------------------------------------------------- */
+
+  var LADO_PNG = 1024;
+
+  function descargarPng(url) {
+    var svgEl;
+
+    try {
+      svgEl = window.QRDemo.svg(url, { oscuro: '#000000', claro: '#ffffff' });
+    } catch (e) {
+      aviso('No se ha podido generar el QR');
+      return;
+    }
+
+    svgEl.setAttribute('width', LADO_PNG);
+    svgEl.setAttribute('height', LADO_PNG);
+
+    var blob = new Blob([new XMLSerializer().serializeToString(svgEl)],
+                        { type: 'image/svg+xml;charset=utf-8' });
+    var fuente = URL.createObjectURL(blob);
+    var img = new Image();
+
+    img.onload = function () {
+      URL.revokeObjectURL(fuente);
+      guardarLienzo(lienzoBlanco(function (cx) {
+        cx.drawImage(img, 0, 0, LADO_PNG, LADO_PNG);
+      }));
+    };
+
+    /* Si el navegador no rasteriza el SVG, pintamos los módulos a mano */
+    img.onerror = function () {
+      URL.revokeObjectURL(fuente);
+      guardarLienzo(lienzoDesdeMatriz(url));
+    };
+
+    img.src = fuente;
+  }
+
+  function lienzoBlanco(pintar) {
+    var cv = document.createElement('canvas');
+    cv.width = LADO_PNG;
+    cv.height = LADO_PNG;
+
+    var cx = cv.getContext('2d');
+    cx.fillStyle = '#ffffff';
+    cx.fillRect(0, 0, LADO_PNG, LADO_PNG);
+    pintar(cx);
+
+    return cv;
+  }
+
+  function lienzoDesdeMatriz(url) {
+    var mod = window.QRDemo.matriz(url);
+    var margen = 4;
+    var total = mod.length + margen * 2;
+    var paso = LADO_PNG / total;
+
+    return lienzoBlanco(function (cx) {
+      cx.fillStyle = '#000000';
+      for (var f = 0; f < mod.length; f++) {
+        for (var c = 0; c < mod.length; c++) {
+          if (mod[f][c]) {
+            cx.fillRect(Math.round((c + margen) * paso), Math.round((f + margen) * paso),
+                        Math.ceil(paso), Math.ceil(paso));
+          }
+        }
+      }
+    });
+  }
+
+  function guardarLienzo(cv) {
+    cv.toBlob(function (png) {
+      if (!png) { aviso('No se ha podido crear el PNG'); return; }
+
+      var enlace = document.createElement('a');
+      enlace.href = URL.createObjectURL(png);
+      enlace.download = 'qr-reservas.png';
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+
+      setTimeout(function () { URL.revokeObjectURL(enlace.href); }, 1000);
+      aviso('QR descargado');
+    }, 'image/png');
   }
 
   /* --- portapapeles --------------------------------------------------------- */
