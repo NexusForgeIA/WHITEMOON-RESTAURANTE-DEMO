@@ -683,3 +683,82 @@
 }
 
 .chat__restart:hover { color: var(--text); }
+
+/* ==========================================================================
+   reserva.html · el chat a pantalla completa (lo que abre el QR)
+   ========================================================================== */
+
+.pr {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.pr__head {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  flex-wrap: wrap;
+  padding: calc(var(--s4) + env(safe-area-inset-top)) var(--s4) var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+
+.pr__titulo {
+  flex: 1;
+  min-width: 0;
+  font-size: .82rem;
+  font-weight: 400;
+  letter-spacing: -.005em;
+  color: var(--muted);
+}
+
+.pr__main {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  padding: var(--s4);
+}
+
+.chat--pagina {
+  position: static;
+  width: 100%;
+  max-width: 520px;
+  height: auto;
+  min-height: 0;
+  margin-inline: auto;
+  opacity: 1;
+  transform: none;
+  box-shadow: none;
+}
+
+.chat--pagina .chat__head { padding-right: var(--s5); }
+
+.chat--pagina .chat__log { min-height: 42vh; }
+
+.pr__pie {
+  padding: var(--s4) var(--s4) calc(var(--s5) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  color: var(--muted-2);
+  font-size: .78rem;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.pr__aviso {
+  max-width: 54ch;
+  margin: var(--s2) auto 0;
+  color: var(--muted-2);
+  opacity: .85;
+}
+
+@media (max-width: 560px) {
+  .pr__main { padding: 0; }
+
+  .chat--pagina {
+    max-width: none;
+    border-inline: none;
+    border-radius: 0;
+  }
+
+  .pr__titulo { flex-basis: 100%; order: 3; }
+}

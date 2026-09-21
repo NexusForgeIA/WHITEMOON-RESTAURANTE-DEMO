@@ -17,6 +17,9 @@
 
   if (!panel || !log) return;
 
+  /* En reserva.html el chat ES la página: ni botón flotante ni cerrar */
+  var modoPagina = panel.getAttribute('data-modo') === 'pagina';
+
   var DIAS  = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   var DOWS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];   /* el calendario empieza en lunes */
   var MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio',
@@ -475,8 +478,14 @@
     if (e.key === 'Escape') { e.preventDefault(); cerrar(); }
   }
 
-  Array.prototype.forEach.call(document.querySelectorAll('[data-open-chat]'), function (b) {
-    b.addEventListener('click', abrir);
-  });
-  closeBt.addEventListener('click', cerrar);
+  if (modoPagina) {
+    panel.hidden = false;
+    panel.classList.add('is-open');
+    arrancar();
+  } else {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-open-chat]'), function (b) {
+      b.addEventListener('click', abrir);
+    });
+    closeBt.addEventListener('click', cerrar);
+  }
 })();

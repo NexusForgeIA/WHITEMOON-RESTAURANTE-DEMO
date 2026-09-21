@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reserva en Restaurante La Brasa (demo WhiteMoon)</title>
+<meta name="description" content="Página de reserva del Restaurante La Brasa: el asistente coge la mesa en el chat. Demo de WhiteMoon, restaurante ficticio.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#08080d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/site.css">
+</head>
+<body class="pr">
+
+<header class="pr__head">
+  <span class="brand__mark">La <em>Brasa</em></span>
+  <h1 class="pr__titulo">Reserva en Restaurante La Brasa</h1>
+  <span class="demo-tag">Demo</span>
+</header>
+
+<main class="pr__main">
+
+  <section class="chat chat--pagina" id="chat" data-modo="pagina" aria-labelledby="chatTitle">
+    <header class="chat__head">
+      <div>
+        <p class="chat__title" id="chatTitle">Reservas · La Brasa</p>
+        <p class="chat__sub">Asistente con IA · demo</p>
+      </div>
+    </header>
+
+    <div class="chat__log" id="chatLog" role="log" aria-live="polite" aria-label="Conversación con el asistente"></div>
+
+    <footer class="chat__foot">
+      <div class="chips" id="chatChips"></div>
+      <form class="chat__form" id="chatForm" hidden>
+        <label class="sr-only" for="chatInput">Tu respuesta</label>
+        <input class="chat__input" id="chatInput" type="text" autocomplete="off" placeholder="Escribe aquí…">
+        <button class="chat__send" type="submit" aria-label="Enviar">
+          <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-hidden="true">
+            <path d="M2.5 8.5h11m-4.5-4.5l4.5 4.5-4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </section>
+
+</main>
+
+<footer class="pr__pie">
+  <p>Calle del Olivar 12 · 28220 Majadahonda, Madrid · 910 00 00 00</p>
+  <p class="pr__aviso">
+    Demo de WhiteMoon. El restaurante es ficticio y el chat sigue un guion fijo:
+    no se envía ningún dato a ninguna parte.
+  </p>
+</footer>
+
+<script src="assets/js/chat.js"></script>
+</body>
+</html>

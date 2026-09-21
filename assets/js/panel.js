@@ -512,7 +512,7 @@
   });
 
   btnCopiar.addEventListener('click', function () {
-    copiarTexto(hojaTexto.value);
+    copiarTexto(hojaTexto.value, btnCopiar, 'Mensaje copiado');
   });
 
   btnWa.addEventListener('click', function () {
@@ -529,12 +529,45 @@
       '&body=' + encodeURIComponent(hojaTexto.value);
   });
 
-  function copiarTexto(texto) {
+  /* --- enlace de reservas + QR ---------------------------------------------
+     La URL se saca de dónde está el panel, así que el QR apunta siempre al
+     sitio donde esté publicado (GitHub Pages, un dominio propio o localhost).
+     -------------------------------------------------------------------- */
+
+  function urlDeReservas() {
+    return new URL('reserva.html', window.location.href).href;
+  }
+
+  function pintarEnlace() {
+    var url = urlDeReservas();
+    var lienzo = $('#qrLienzo');
+
+    $('#urlReserva').textContent = url.replace(/^https?:\/\//, '');
+
+    lienzo.innerHTML = '';
+    try {
+      lienzo.appendChild(window.QRDemo.svg(url, {
+        etiqueta: 'Código QR de la página de reservas'
+      }));
+    } catch (e) {
+      lienzo.appendChild(el('p', 'qr__fallo', 'No se ha podido pintar el QR. El enlace de abajo sigue valiendo.'));
+    }
+
+    $('#btnCopiarUrl').addEventListener('click', function () {
+      copiarTexto(url, $('#btnCopiarUrl'), 'Enlace copiado');
+    });
+  }
+
+  /* --- portapapeles --------------------------------------------------------- */
+
+  function copiarTexto(texto, boton, mensaje) {
+    var etiqueta = boton.textContent;
+
     var hecho = function () {
-      btnCopiar.textContent = 'Copiado';
-      aviso('Mensaje copiado');
+      boton.textContent = 'Copiado';
+      aviso(mensaje);
       clearTimeout(copiarTimer);
-      copiarTimer = setTimeout(function () { btnCopiar.textContent = 'Copiar'; }, 2000);
+      copiarTimer = setTimeout(function () { boton.textContent = etiqueta; }, 2000);
     };
 
     if (navigator.clipboard && window.isSecureContext) {
@@ -546,12 +579,22 @@
 
   /* Reserva para contextos sin portapapeles (file://, navegadores viejos) */
   function copiaManual(texto, hecho) {
-    hojaTexto.focus();
-    hojaTexto.select();
+    var area = document.createElement('textarea');
+    area.value = texto;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.appendChild(area);
+    area.select();
+
     try {
       if (document.execCommand('copy')) { hecho(); return; }
-    } catch (e) { /* sin portapapeles: queda seleccionado para copiar a mano */ }
-    aviso('Selecciona el texto y cópialo a mano');
+      aviso('Copia el texto a mano, por favor');
+    } catch (e) {
+      aviso('Copia el texto a mano, por favor');
+    } finally {
+      area.remove();
+    }
   }
 
   /* --- filtros y navegación ------------------------------------------------ */
@@ -598,5 +641,6 @@
   }
 
   $('#hoyFecha').textContent = fechaDeHoy();
+  pintarEnlace();
   pintar();
 })();
