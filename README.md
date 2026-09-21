@@ -16,9 +16,10 @@ sin backend y con datos de mentira.
 
 - **Restaurante La Brasa** es un negocio ficticio. Dirección, teléfono, carta y
   reservas son datos de ejemplo. Ambas páginas van con `noindex`.
-- El chat **no lleva IA**: es un guion fijo en `assets/js/chat.js`. Lo que sí es
-  real es el final: al cerrar la reserva llama a la edge function `reservas-mt`
-  con el token público `demo-restaurante`, así que la reserva se guarda.
+- El chat **lleva IA de verdad**: `assets/js/chat.js` solo conversa y manda el
+  historial a la edge function `restaurante-chat`. Preguntar lo que falta,
+  mirar el aforo y crear la reserva lo hace el backend, que responde con el
+  texto y, cuando la cierra, con los datos de la reserva.
 - El panel ya no inventa nada: lee y escribe contra la edge function
   `reservas-mt` (reservas, mesas y configuración del tenant `demo-restaurante`).
   Pide una clave al entrar, que se guarda en `sessionStorage`; en la demo es
