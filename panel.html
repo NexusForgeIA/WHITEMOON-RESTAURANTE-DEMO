@@ -115,9 +115,16 @@
     </div>
 
     <div class="enlace__acciones">
+      <button class="btn btn--ghost" type="button" id="btnPng">Descargar QR (PNG)</button>
+      <button class="btn btn--ghost" type="button" id="btnCartel">Descargar cartel (PDF)</button>
       <a class="btn btn--ghost" href="reserva.html" target="_blank" rel="noopener">Abrir la página de reservas</a>
       <a class="btn btn--ghost" href="index.html">Ver la web del restaurante</a>
     </div>
+
+    <p class="enlace__nota">
+      El PNG sale en negro sobre blanco, listo para imprimir o pegar donde haga
+      falta. El cartel abre la ventana de impresión: elige «Guardar como PDF».
+    </p>
   </section>
 
 </main>
@@ -185,6 +192,17 @@
     <button class="btn btn--ghost" type="button" id="btnMail">Email</button>
     <button class="btn btn--ember" type="button" id="btnWa">WhatsApp</button>
   </footer>
+</section>
+
+<!-- Cartel imprimible: oculto en pantalla, es lo único que sale al imprimir -->
+
+<section class="cartel" id="cartel">
+  <p class="cartel__marca">Restaurante La Brasa</p>
+  <h2 class="cartel__titular">Reserva tu mesa</h2>
+  <p class="cartel__sub">Escanea y reserva en segundos</p>
+  <div class="cartel__qr" id="cartelQr"></div>
+  <p class="cartel__url" id="cartelUrl"></p>
+  <p class="cartel__pie">Demo de WhiteMoon · restaurante ficticio</p>
 </section>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
