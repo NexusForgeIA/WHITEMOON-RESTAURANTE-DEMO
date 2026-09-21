@@ -9,7 +9,7 @@ sin backend y con datos de mentira.
 | Página | Qué es |
 |---|---|
 | `index.html` | Web del restaurante (comensal) con el widget de chat de reservas abajo a la derecha. |
-| `panel.html` | Panel del dueño, mobile-first: reservas del día por turnos + mesas + cuadro de mando. |
+| `panel.html` | Panel del dueño, mobile-first: reservas del día por turnos + mesas + cuadro de mando + generador de mensaje para el cliente. |
 
 ## Qué es de mentira
 
@@ -19,6 +19,9 @@ sin backend y con datos de mentira.
   de red, ni Supabase, ni edge functions, ni tokens.
 - El panel guarda el estado en variables JS. Al recargar vuelven los datos demo.
   No se usa `localStorage`.
+- Los teléfonos (`600 00 00 0X`) y los correos (`@example.com`) de las reservas
+  son inventados. El generador de mensaje no envía nada: copia el texto o abre
+  wa.me / el cliente de correo para que decida el encargado.
 - La carta no lleva precios.
 
 ## Estructura

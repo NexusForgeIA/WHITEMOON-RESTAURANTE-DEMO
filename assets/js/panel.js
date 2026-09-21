@@ -21,15 +21,15 @@
   ];
 
   var reservas = [
-    { id: 101, nombre: 'Marta Ferrer',    personas: 2, hora: '13:30', turno: 'comida', mesa: 1,    estado: 'confirmada', origen: 'Asistente IA', nota: '' },
-    { id: 102, nombre: 'Grupo Álvarez',   personas: 6, hora: '13:30', turno: 'comida', mesa: 5,    estado: 'sentada',    origen: 'Teléfono',     nota: 'Comida de empresa, facturan a nombre de la gestoría' },
-    { id: 103, nombre: 'Luis Sanmartín',  personas: 4, hora: '14:30', turno: 'comida', mesa: 3,    estado: 'confirmada', origen: 'Asistente IA', nota: 'Una trona' },
-    { id: 104, nombre: 'Claudia Rey',     personas: 2, hora: '14:30', turno: 'comida', mesa: null, estado: 'pendiente',  origen: 'Asistente IA', nota: '' },
-    { id: 105, nombre: 'Familia Otero',   personas: 8, hora: '20:30', turno: 'cena',   mesa: 7,    estado: 'confirmada', origen: 'Teléfono',     nota: 'Cumpleaños, traen tarta' },
-    { id: 106, nombre: 'Íñigo Pardo',     personas: 3, hora: '20:30', turno: 'cena',   mesa: 8,    estado: 'pendiente',  origen: 'Asistente IA', nota: '' },
-    { id: 107, nombre: 'Nuria Casas',     personas: 2, hora: '21:00', turno: 'cena',   mesa: 2,    estado: 'confirmada', origen: 'Asistente IA', nota: 'Sin gluten' },
-    { id: 108, nombre: 'Pablo Duarte',    personas: 4, hora: '21:30', turno: 'cena',   mesa: 4,    estado: 'pendiente',  origen: 'Asistente IA', nota: '' },
-    { id: 109, nombre: 'Rosa Iglesias',   personas: 4, hora: '21:30', turno: 'cena',   mesa: 6,    estado: 'cancelada',  origen: 'Teléfono',     nota: 'Avisa de que le ha surgido un viaje' }
+    { id: 101, nombre: 'Marta Ferrer',    personas: 2, hora: '13:30', turno: 'comida', mesa: 1,    estado: 'confirmada', origen: 'Asistente IA', nota: '', tel: '600 00 00 01', email: 'marta@example.com' },
+    { id: 102, nombre: 'Grupo Álvarez',   personas: 6, hora: '13:30', turno: 'comida', mesa: 5,    estado: 'sentada',    origen: 'Teléfono',     nota: 'Comida de empresa, facturan a nombre de la gestoría', tel: '600 00 00 02', email: 'reservas@example.com' },
+    { id: 103, nombre: 'Luis Sanmartín',  personas: 4, hora: '14:30', turno: 'comida', mesa: 3,    estado: 'confirmada', origen: 'Asistente IA', nota: 'Una trona', tel: '600 00 00 03', email: '' },
+    { id: 104, nombre: 'Claudia Rey',     personas: 2, hora: '14:30', turno: 'comida', mesa: null, estado: 'pendiente',  origen: 'Asistente IA', nota: '', tel: '600 00 00 04', email: 'claudia@example.com' },
+    { id: 105, nombre: 'Familia Otero',   personas: 8, hora: '20:30', turno: 'cena',   mesa: 7,    estado: 'confirmada', origen: 'Teléfono',     nota: 'Cumpleaños, traen tarta', tel: '600 00 00 05', email: '' },
+    { id: 106, nombre: 'Íñigo Pardo',     personas: 3, hora: '20:30', turno: 'cena',   mesa: 8,    estado: 'pendiente',  origen: 'Asistente IA', nota: '', tel: '600 00 00 06', email: 'inigo@example.com' },
+    { id: 107, nombre: 'Nuria Casas',     personas: 2, hora: '21:00', turno: 'cena',   mesa: 2,    estado: 'confirmada', origen: 'Asistente IA', nota: 'Sin gluten', tel: '600 00 00 07', email: '' },
+    { id: 108, nombre: 'Pablo Duarte',    personas: 4, hora: '21:30', turno: 'cena',   mesa: 4,    estado: 'pendiente',  origen: 'Asistente IA', nota: '', tel: '600 00 00 08', email: 'pablo@example.com' },
+    { id: 109, nombre: 'Rosa Iglesias',   personas: 4, hora: '21:30', turno: 'cena',   mesa: 6,    estado: 'cancelada',  origen: 'Teléfono',     nota: 'Avisa de que le ha surgido un viaje', tel: '600 00 00 09', email: '' }
   ];
 
   var filtro = 'todo';
@@ -152,6 +152,17 @@
     });
     card.appendChild(acciones);
 
+    /* Una reserva cancelada no necesita que le escribamos */
+    if (r.estado !== 'cancelada') {
+      var msg = el('button', 'res__msg');
+      msg.type = 'button';
+      msg.setAttribute('aria-label', 'Escribir a ' + r.nombre);
+      msg.appendChild(svg(ICONO_MENSAJE, 15));
+      msg.appendChild(el('span', null, 'Mensaje'));
+      msg.addEventListener('click', function () { abrirMensaje(r); });
+      card.appendChild(msg);
+    }
+
     return card;
   }
 
@@ -199,6 +210,7 @@
 
   /* --- pintado: mesas ----------------------------------------------------- */
 
+  var ICONO_MENSAJE = '<path d="M13.5 9.5a1.5 1.5 0 01-1.5 1.5H6l-3 2.5V4a1.5 1.5 0 011.5-1.5h7A1.5 1.5 0 0113.5 4v5.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>';
   var ICONO_EDITAR  = '<path d="M11.1 2.4l2.5 2.5L6 12.5l-3.2.7.7-3.2 7.6-7.6z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>';
   var ICONO_BORRAR  = '<path d="M3 4.5h10M6.5 4.5V3h3v1.5M5 4.5l.6 8.2h4.8L11 4.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>';
 
@@ -360,6 +372,187 @@
     abrirAlta(false);
     pintar();
   });
+
+  /* --- mensaje al cliente --------------------------------------------------
+     Genera el texto con los datos de la reserva y lo deja listo para copiar,
+     mandar por WhatsApp (wa.me, el enlace público de toda la vida) o por
+     correo. Nunca envía nada por su cuenta: abre la app y el encargado decide.
+     -------------------------------------------------------------------- */
+
+  var PLANTILLAS = {
+    confirmacion: function (r) {
+      return 'Hola ' + r.nombre + ', tu reserva en Restaurante La Brasa para ' +
+             r.personas + ' personas el ' + fechaMensaje() + ' a las ' + r.hora +
+             ' está confirmada. ¡Te esperamos! Si necesitas cambiar algo, ' +
+             'responde a este mensaje.';
+    },
+    recordatorio: function (r) {
+      return 'Hola ' + r.nombre + ', te recordamos tu reserva en La Brasa el ' +
+             fechaMensaje() + ' a las ' + r.hora + ' para ' + r.personas +
+             ' personas. Si no pudieras venir, avísanos por favor. ¡Gracias!';
+    }
+  };
+
+  var COLETILLA_GRUPO = 'Al ser un grupo grande, confírmanos por favor un día antes.';
+  var ASUNTO = 'Tu reserva en Restaurante La Brasa';
+
+  var hoja       = $('#sheet');
+  var hojaFondo  = $('#sheetBack');
+  var hojaSub    = $('#sheetSub');
+  var hojaTexto  = $('#sheetTexto');
+  var btnCopiar  = $('#btnCopiar');
+  var btnWa      = $('#btnWa');
+  var btnMail    = $('#btnMail');
+  var plantillas = document.querySelectorAll('#plantillas button');
+
+  var reservaActual = null;
+  var plantillaActual = 'confirmacion';
+  var devolverFoco = null;
+  var copiarTimer = null;
+  var abiertaEn = 0;
+
+  function fechaMensaje() {
+    return fechaDeHoy().replace(/ (\d+) /, ' $1 de ');
+  }
+
+  function componerMensaje(r, tipo) {
+    var texto = PLANTILLAS[tipo](r);
+    var mesa = mesaPorId(r.mesa);
+
+    if (mesa) texto += ' Te guardamos la mesa ' + mesa.id + ' (' + mesa.zona + ').';
+    if (r.personas > 6) texto += '\n\n' + COLETILLA_GRUPO;
+
+    return texto;
+  }
+
+  /* wa.me quiere el número sin símbolos y con prefijo de país */
+  function telefonoWa(tel) {
+    var digitos = (tel || '').replace(/\D/g, '');
+    if (!digitos) return '';
+    return digitos.length === 9 ? '34' + digitos : digitos;
+  }
+
+  function abrirMensaje(r) {
+    reservaActual = r;
+    plantillaActual = 'confirmacion';
+    devolverFoco = document.activeElement;
+
+    hojaSub.textContent = r.nombre + ' · ' + r.personas +
+      (r.personas === 1 ? ' persona' : ' personas') + ' · ' + r.hora;
+
+    Array.prototype.forEach.call(plantillas, function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset.tpl === plantillaActual));
+    });
+
+    refrescarTexto();
+
+    btnWa.disabled = !telefonoWa(r.tel);
+    btnMail.disabled = !r.email;
+    btnMail.title = r.email ? 'Escribir a ' + r.email : 'Esta reserva no tiene correo';
+
+    /* La entrada la anima el CSS al quitar [hidden]: nada que temporizar */
+    hojaFondo.hidden = false;
+    hoja.hidden = false;
+    abiertaEn = Date.now();
+
+    document.addEventListener('keydown', teclasHoja);
+    plantillas[0].focus();
+  }
+
+  function cerrarMensaje() {
+    document.removeEventListener('keydown', teclasHoja);
+    hoja.hidden = true;
+    hojaFondo.hidden = true;
+    reservaActual = null;
+    if (devolverFoco && devolverFoco.focus) devolverFoco.focus();
+  }
+
+  /* Esc cierra y el tabulador no se escapa de la hoja */
+  function teclasHoja(e) {
+    if (e.key === 'Escape') { e.preventDefault(); cerrarMensaje(); return; }
+    if (e.key !== 'Tab') return;
+
+    var focos = hoja.querySelectorAll('button:not(:disabled), textarea, [href]');
+    if (!focos.length) return;
+
+    var primero = focos[0];
+    var ultimo = focos[focos.length - 1];
+
+    if (e.shiftKey && document.activeElement === primero) {
+      e.preventDefault();
+      ultimo.focus();
+    } else if (!e.shiftKey && document.activeElement === ultimo) {
+      e.preventDefault();
+      primero.focus();
+    }
+  }
+
+  function refrescarTexto() {
+    if (reservaActual) hojaTexto.value = componerMensaje(reservaActual, plantillaActual);
+  }
+
+  Array.prototype.forEach.call(plantillas, function (b) {
+    b.addEventListener('click', function () {
+      plantillaActual = b.dataset.tpl;
+      Array.prototype.forEach.call(plantillas, function (o) {
+        o.setAttribute('aria-pressed', String(o === b));
+      });
+      refrescarTexto();
+    });
+  });
+
+  $('#sheetClose').addEventListener('click', cerrarMensaje);
+
+  /* El fondo cierra, pero no en los primeros milisegundos: el mismo toque que
+     abre la hoja llega al fondo recién puesto (el "click fantasma" del móvil)
+     y la cerraría de inmediato. */
+  hojaFondo.addEventListener('click', function () {
+    if (Date.now() - abiertaEn < 350) return;
+    cerrarMensaje();
+  });
+
+  btnCopiar.addEventListener('click', function () {
+    copiarTexto(hojaTexto.value);
+  });
+
+  btnWa.addEventListener('click', function () {
+    if (!reservaActual) return;
+    var url = 'https://wa.me/' + telefonoWa(reservaActual.tel) +
+              '?text=' + encodeURIComponent(hojaTexto.value);
+    window.open(url, '_blank', 'noopener');
+  });
+
+  btnMail.addEventListener('click', function () {
+    if (!reservaActual || !reservaActual.email) return;
+    window.location.href = 'mailto:' + encodeURIComponent(reservaActual.email) +
+      '?subject=' + encodeURIComponent(ASUNTO) +
+      '&body=' + encodeURIComponent(hojaTexto.value);
+  });
+
+  function copiarTexto(texto) {
+    var hecho = function () {
+      btnCopiar.textContent = 'Copiado';
+      aviso('Mensaje copiado');
+      clearTimeout(copiarTimer);
+      copiarTimer = setTimeout(function () { btnCopiar.textContent = 'Copiar'; }, 2000);
+    };
+
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(texto).then(hecho, function () { copiaManual(texto, hecho); });
+    } else {
+      copiaManual(texto, hecho);
+    }
+  }
+
+  /* Reserva para contextos sin portapapeles (file://, navegadores viejos) */
+  function copiaManual(texto, hecho) {
+    hojaTexto.focus();
+    hojaTexto.select();
+    try {
+      if (document.execCommand('copy')) { hecho(); return; }
+    } catch (e) { /* sin portapapeles: queda seleccionado para copiar a mano */ }
+    aviso('Selecciona el texto y cópialo a mano');
+  }
 
   /* --- filtros y navegación ------------------------------------------------ */
 
