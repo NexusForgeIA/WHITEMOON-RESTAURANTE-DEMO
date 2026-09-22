@@ -13,7 +13,10 @@
   --blue: #2563eb;
   --blue-dark: #123a8a;
   --warm: #e08a3c;
-  --warm-dark: #c6702a;
+  /* Hover del CTA, con --ink encima. El #c6702a anterior medía 4.338:1 y no
+     llegaba a AA; éste es el cálido más cercano que sí (ΔE2000 1.03) y mide
+     4.505:1. El reposo (--warm) sigue en 5.936:1. */
+  --warm-dark: #c9732d;
   --muted: #5b6b7b;
   --border: #e5ecf4;
 
