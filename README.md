@@ -10,11 +10,11 @@ sin backend y con datos de mentira.
 |---|---|
 | `index.html` | Web del restaurante (comensal) con el widget de chat de reservas abajo a la derecha. |
 | `reserva.html` | Página de reserva suelta: solo el chat, a pantalla completa. Es lo que abre el QR. |
-| `panel.html` | Panel del dueño, mobile-first: reservas del día por turnos + mesas + cuadro de mando, generador de mensaje para el cliente y su enlace de reservas con QR, descargable en PNG y como cartel imprimible. |
+| `panel.html` | No se enlaza desde la web pública: se abre por URL directa y va con `noindex`. Panel del dueño, mobile-first: reservas del día por turnos + mesas + cuadro de mando, generador de mensaje para el cliente y su enlace de reservas con QR, descargable en PNG y como cartel imprimible. |
 
 ## Qué es de mentira
 
-- **Restaurante La Brasa** es un negocio ficticio. Dirección, teléfono, carta y
+- **Restaurante WhiteMoon** es un negocio ficticio. Dirección, teléfono, carta y
   reservas son datos de ejemplo. Ambas páginas van con `noindex`.
 - El chat **no conversa ni lleva IA**: `assets/js/chat.js` es un reservador
   guiado por pasos (día, turno, hora, zona, personas y datos). Solo se escriben
@@ -35,9 +35,12 @@ index.html
 reserva.html
 panel.html
 assets/
-  css/base.css     tokens compartidos (color, tipografía, espaciado, motion)
-  css/site.css     web del comensal + widget de chat + página de reserva
+  css/base.css     tokens compartidos (tipografía, espaciado, motion) y la
+                   paleta oscura, que hoy solo usa el panel
+  css/site.css     web del comensal + widget de chat + página de reserva.
+                   Redefine los tokens de color en :root con la paleta clara
   css/panel.css    panel del dueño
+  img/             fotos de ambiente (WebP + JPG) y la og:image
   js/chat.js       conversación guionizada de reserva (widget y página)
   js/panel.js      estado en memoria, cuadro de mando, reservas y mesas
   js/qr.js         generador de QR propio, sin dependencias
@@ -58,9 +61,25 @@ lo que los lectores de QR leen sin quejarse.
 
 ## Diseño
 
-Dark premium WhiteMoon (`--bg: #08080d`) con acento de brasa (`--ember: #ffab2e`),
-tipografía Sora y sin fotos de stock. Responsive; el panel está pensado primero
-para móvil, con barra de pestañas inferior.
+Dos paletas, a propósito:
+
+- **Web pública** (`index.html`, `reserva.html`): clara. Blanco `#ffffff`, tinta
+  `#0f2436`, azul `#2563eb` para títulos y enlaces, y cálido `#e08a3c` para el
+  CTA de reservar. Los tokens viven en el `:root` de `site.css`, que reapunta
+  los de `base.css`; por eso la web es clara y el panel no.
+- **Panel** (`panel.html`): sigue oscuro (`--bg: #08080d`) con acento de brasa.
+  Es una herramienta interna y no se enseña al comensal.
+
+Todo el texto cumple contraste AA. El cálido no se usa nunca como color de
+texto sobre blanco (no llega a 4.5:1): va de fondo, con la tinta encima.
+
+Las fotos son de [Unsplash](https://unsplash.com) (licencia libre, sin
+personas), autoalojadas en `assets/img/` a ~1600 px y calidad 70, en WebP con
+respaldo JPG vía `<picture>`. Llevan `width`/`height` y `aspect-ratio` para que
+no haya saltos de maquetación.
+
+Tipografía Sora. Responsive; el panel está pensado primero para móvil, con
+barra de pestañas inferior.
 
 ## Ver en local
 

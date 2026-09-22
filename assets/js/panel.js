@@ -1,5 +1,5 @@
 /* ==========================================================================
-   La Brasa · panel del dueño
+   Restaurante WhiteMoon · panel del dueño
 
    Los datos son reales: reservas, mesas y configuración salen de la edge
    function reservas-mt y las escrituras vuelven allí. Lo único de demo que
@@ -568,20 +568,20 @@
 
   var PLANTILLAS = {
     confirmacion: function (r) {
-      return 'Hola ' + r.cliente_nombre + ', tu reserva en Restaurante La Brasa para ' +
+      return 'Hola ' + r.cliente_nombre + ', tu reserva en Restaurante WhiteMoon para ' +
              r.personas + ' personas el ' + fechaMensaje(r) + ' a las ' + r.hora +
              ' está confirmada. ¡Te esperamos! Si necesitas cambiar algo, ' +
              'responde a este mensaje.';
     },
     recordatorio: function (r) {
-      return 'Hola ' + r.cliente_nombre + ', te recordamos tu reserva en La Brasa el ' +
+      return 'Hola ' + r.cliente_nombre + ', te recordamos tu reserva en Restaurante WhiteMoon el ' +
              fechaMensaje(r) + ' a las ' + r.hora + ' para ' + r.personas +
              ' personas. Si no pudieras venir, avísanos por favor. ¡Gracias!';
     }
   };
 
   var COLETILLA_GRUPO = 'Al ser un grupo grande, confírmanos por favor un día antes.';
-  var ASUNTO = 'Tu reserva en Restaurante La Brasa';
+  var ASUNTO = 'Tu reserva en Restaurante WhiteMoon';
 
   var hoja       = $('#sheet');
   var hojaFondo  = $('#sheetBack');

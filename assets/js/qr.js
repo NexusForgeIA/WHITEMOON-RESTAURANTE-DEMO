@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Generador de QR mínimo — La Brasa (DEMO)
+   Generador de QR mínimo — Restaurante WhiteMoon (DEMO)
 
    Sin librerías ni CDN: el panel tiene que poder pintar el QR aunque el
    móvil del dueño no tenga cobertura en la barra.

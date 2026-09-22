@@ -1,5 +1,5 @@
 /* ==========================================================================
-   La Brasa · reservador guiado
+   Restaurante WhiteMoon · reservador guiado
 
    Un formulario por pasos con pinta de chat: día, turno, hora, zona, personas
    y datos. No hay IA ni conversación: solo se escriben el nombre y el
@@ -638,7 +638,7 @@
   /* El estado real es "pendiente": no se dice que esté confirmada */
   function registrada() {
     bot(['¡Reserva registrada! El restaurante te la confirma enseguida.'], function () {
-      tarjeta('Reserva registrada · La Brasa');
+      tarjeta('Reserva registrada · Restaurante WhiteMoon');
 
       bot(['Si te surge algo, llámanos al 910 00 00 00 y la movemos.'], function () {
         pintarChips([
@@ -686,7 +686,7 @@
     sedeActiva = null;
     enviando = false;
 
-    bot(['Buenas, soy el asistente de La Brasa. Te busco mesa en unos toques.'],
+    bot(['Buenas, soy el asistente de Restaurante WhiteMoon. Te busco mesa en unos toques.'],
         GRUPO ? pasoSede : pasoDia);
   }
 
