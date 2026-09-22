@@ -3,18 +3,56 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Restaurante La Brasa · Demo de reservas — WhiteMoon</title>
+<title>Restaurante WhiteMoon · Demo de reservas — WhiteMoon</title>
 <meta name="description" content="Demo visual de WhiteMoon: web de restaurante con reservador guiado que registra la mesa en un par de toques. Restaurante ficticio.">
 <meta name="robots" content="noindex, nofollow">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Restaurante La Brasa · Demo de reservas">
+<meta property="og:title" content="Restaurante WhiteMoon · Demo de reservas">
 <meta property="og:description" content="Demo visual de WhiteMoon. Restaurante ficticio, datos de ejemplo.">
-<meta name="theme-color" content="#08080d">
+<meta property="og:image" content="assets/img/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Sala del Restaurante WhiteMoon con ventanales altos, mesas de madera y una pared de plantas.">
+<meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/base.css">
 <link rel="stylesheet" href="assets/css/site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "Restaurante WhiteMoon",
+  "description": "Restaurante ficticio de la demo de producto de WhiteMoon Agencia IA.",
+  "image": "assets/img/og.jpg",
+  "servesCuisine": "Española",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Calle del Olivar 12",
+    "postalCode": "28220",
+    "addressLocality": "Majadahonda",
+    "addressRegion": "Madrid",
+    "addressCountry": "ES"
+  },
+  "telephone": "+34910000000",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      "opens": "13:00",
+      "closes": "16:00"
+    },
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+      "opens": "20:00",
+      "closes": "23:30"
+    }
+  ],
+  "acceptsReservations": true
+}
+</script>
 </head>
 <body>
 
@@ -23,14 +61,13 @@
 <header class="nav">
   <div class="wrap nav__inner">
     <a class="brand" href="#main">
-      <span class="brand__mark">La <em>Brasa</em></span>
+      <span class="brand__mark">Restaurante <em>WhiteMoon</em></span>
       <span class="brand__kind">Majadahonda</span>
     </a>
     <nav class="nav__links" aria-label="Secciones">
       <a href="#sitio">El sitio</a>
       <a href="#carta">La carta</a>
       <a href="#reservar">Reservar</a>
-      <a href="panel.html">Panel</a>
     </nav>
     <span class="demo-tag">Demo<span class="nav__tag-full"> · restaurante ficticio</span></span>
   </div>
@@ -39,6 +76,12 @@
 <main id="main">
 
   <section class="hero">
+    <picture class="hero__foto">
+      <source srcset="assets/img/hero.webp" type="image/webp">
+      <img src="assets/img/hero.jpg" width="1600" height="900" decoding="async" fetchpriority="high"
+           alt="Sala del restaurante con ventanales altos, mesas de madera y una pared llena de plantas.">
+    </picture>
+
     <div class="wrap hero__inner">
       <h1>Encina, sal gorda y <em>la mesa puesta</em> cuando llegas.</h1>
       <p class="hero__lead">
@@ -102,6 +145,33 @@
     </div>
   </section>
 
+  <section class="section" id="fotos" aria-labelledby="t-fotos">
+    <div class="wrap">
+      <h2 id="t-fotos">El sitio, por dentro</h2>
+      <p class="section__lead">
+        Fotos de ambiente para la demo. El restaurante es ficticio.
+      </p>
+
+      <div class="fotos">
+        <figure>
+          <img src="assets/img/mesa.jpg" width="1200" height="900" loading="lazy" decoding="async"
+               alt="Mesa redonda puesta con copas de vino, platos y servilletas de tela.">
+          <figcaption>Mantel de tela, copas puestas y sitio para la sobremesa.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/img/cocina.jpg" width="1200" height="900" loading="lazy" decoding="async"
+               alt="Cocina profesional vacía, con los cucharones colgados sobre el pase.">
+          <figcaption>La cocina, antes de que se encienda la parrilla.</figcaption>
+        </figure>
+        <figure>
+          <img src="assets/img/plato.jpg" width="1200" height="900" loading="lazy" decoding="async"
+               alt="Plato blanco emplatado sobre una mesa de madera clara.">
+          <figcaption>La carta cambia con lo que llega al mercado.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="carta">
     <div class="wrap">
       <h2>La carta, en corto</h2>
@@ -161,14 +231,14 @@
 <footer class="foot">
   <div class="wrap">
     <div class="foot__row">
-      <span class="brand__mark">La <em>Brasa</em></span>
-      <a href="panel.html">Panel del dueño (demo)</a>
+      <span class="brand__mark">Restaurante <em>WhiteMoon</em></span>
       <a href="https://whitemoon.es" rel="noopener">WhiteMoon Agencia IA</a>
     </div>
     <p class="foot__disclaimer">
-      Demo de producto de WhiteMoon. «Restaurante La Brasa» es un negocio ficticio:
+      Demo de producto de WhiteMoon. «Restaurante WhiteMoon» es un negocio ficticio:
       la dirección, el teléfono y la carta son datos de ejemplo. La reserva, en
       cambio, es real: se guarda en el sistema del restaurante.
+      Fotos de Unsplash.
     </p>
   </div>
 </footer>
@@ -184,7 +254,7 @@
          data-grupo="labrasa-demo" hidden>
   <header class="chat__head">
     <div>
-      <p class="chat__title" id="chatTitle">Reservas · La Brasa</p>
+      <p class="chat__title" id="chatTitle">Reservas · Restaurante WhiteMoon</p>
       <p class="chat__sub">Asistente IA · demo</p>
     </div>
     <button class="chat__close" type="button" id="chatClose" aria-label="Cerrar el chat">
