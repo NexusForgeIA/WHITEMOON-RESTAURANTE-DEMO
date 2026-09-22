@@ -27,7 +27,9 @@ body {
 .p-head__row {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--s3);
+  row-gap: var(--s2);
 }
 
 .p-head__mark {
@@ -38,6 +40,38 @@ body {
 }
 
 .p-head__mark em { font-style: normal; color: var(--ember); }
+
+/* Selector de sede: solo aparece en marcas con más de un restaurante.
+   La flecha va de fondo porque appearance:none se lleva la nativa. */
+.p-head__sede {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 42vw;
+  min-height: 40px;
+  padding: .4rem 1.9rem .4rem .7rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, .04);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a9aae' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right .65rem center;
+  color: var(--text);
+  font-size: .82rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color var(--fast) var(--ease-out);
+}
+
+.p-head__sede:hover { border-color: var(--ember); }
+.p-head__sede:focus { outline: none; border-color: var(--ember); }
+
+/* El desplegable nativo no hereda el tema oscuro en Windows ni en Android */
+.p-head__sede option {
+  background: var(--surface);
+  color: var(--text);
+}
 
 .p-head__date {
   margin-left: auto;

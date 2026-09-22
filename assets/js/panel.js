@@ -14,8 +14,16 @@
      -------------------------------------------------------------------- */
 
   var API   = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/reservas-mt';
-  var TOKEN = 'demo-restaurante';
   var CLAVE_GUARDADA = 'wm-reservas-clave';
+  var SEDE_GUARDADA  = 'wm-reservas-sede';
+
+  /* Marca con varias sedes. Vacío = un solo restaurante: el panel se comporta
+     exactamente igual que antes, sin selector y con TOKEN fijo. Con valor, las
+     sedes las da el servidor en panel_sedes y TOKEN pasa a ser la sede activa. */
+  var GRUPO = 'labrasa-demo';
+
+  /* Deja de ser constante en modo marca: lo reescribe la sede elegida */
+  var TOKEN = 'demo-restaurante';
 
   /* La clave del panel vive en sessionStorage. En github.io el almacenamiento
      es del origen entero (lo comparten todos los repos del usuario), pero aquí
@@ -31,6 +39,9 @@
   var reservas = [];
   var mesas = [];
   var config = {};
+
+  /* Sedes de la marca. En modo sede única se queda vacío */
+  var sedes = [];
 
   function api(action, extra) {
     var cuerpo = { token: TOKEN, panel_key: panelKey, action: action };
@@ -985,11 +996,69 @@
     pintarMesas();
   }
 
+  /* --- sedes de la marca ----------------------------------------------------
+     Solo en modo marca (GRUPO con valor). La sede activa es TOKEN, así que no
+     hay que tocar api(): toda lectura y toda escritura van ya a la sede que
+     esté elegida.
+     -------------------------------------------------------------------- */
+
+  var sedeSel = $('#sedeSel');
+
+  function esSedeConocida(tenant) {
+    for (var i = 0; i < sedes.length; i++) if (sedes[i].tenant === tenant) return true;
+    return false;
+  }
+
+  function guardarSede(tenant) {
+    try { window.sessionStorage.setItem(SEDE_GUARDADA, tenant); } catch (e) {}
+  }
+
+  /* La sede de la última vez si sigue en la lista; si no, la primera */
+  function sedeInicial() {
+    var guardada = '';
+    try { guardada = window.sessionStorage.getItem(SEDE_GUARDADA) || ''; } catch (e) {}
+    return esSedeConocida(guardada) ? guardada : sedes[0].tenant;
+  }
+
+  /* Con una sola sede el selector sobra: no hay nada que elegir */
+  function pintarSedes() {
+    sedeSel.innerHTML = '';
+
+    sedes.forEach(function (s) {
+      var o = el('option', null, s.ciudad || s.tenant);
+      o.value = s.tenant;
+      if (s.tenant === TOKEN) o.selected = true;
+      sedeSel.appendChild(o);
+    });
+
+    sedeSel.hidden = sedes.length < 2;
+  }
+
+  function cambiarSede(tenant) {
+    if (!tenant || tenant === TOKEN) return;
+
+    TOKEN = tenant;
+    guardarSede(tenant);
+    cargarDia(diaSel);
+  }
+
+  sedeSel.addEventListener('change', function () { cambiarSede(sedeSel.value); });
+
   /* --- carga del día --------------------------------------------------------
      Una llamada por día: el servidor devuelve reservas, mesas y config.
      -------------------------------------------------------------------- */
 
   var cargando = false;
+
+  /* Respuesta de panel_listar → estado y pintado */
+  function volcar(res) {
+    reservas = res.reservas || [];
+    mesas    = res.mesas || [];
+    config   = res.config || {};
+
+    pintarZonasAlta();
+    pintar();
+  }
 
   function cargarDia(fecha) {
     if (cargando) return Promise.resolve();
@@ -1007,12 +1076,7 @@
         return res;
       }
 
-      reservas = res.reservas || [];
-      mesas    = res.mesas || [];
-      config   = res.config || {};
-
-      pintarZonasAlta();
-      pintar();
+      volcar(res);
       return res;
     });
   }
@@ -1040,29 +1104,57 @@
     pedirClave(motivo);
   }
 
+  /* Clave buena: se guarda y se quita el acceso de en medio */
+  function sesionAbierta(clave) {
+    try { window.sessionStorage.setItem(CLAVE_GUARDADA, clave); } catch (e) {}
+
+    acceso.hidden = true;
+    accesoError.textContent = '';
+  }
+
+  function accesoFallido(res) {
+    panelKey = '';
+    if (res && res.error === 'sin_red') accesoError.textContent = 'Sin conexión. Inténtalo otra vez.';
+    else accesoError.textContent = 'Clave incorrecta.';
+    return false;
+  }
+
+  /* Modo marca: primero las sedes de la marca, después el día de la sede
+     activa. Son dos llamadas porque panel_sedes no sabe qué día se mira. */
+  function entrarMarca(clave) {
+    return api('panel_sedes', { grupo: GRUPO }).then(function (res) {
+      if (!res || !res.ok) return accesoFallido(res);
+
+      if (!res.sedes || !res.sedes.length) {
+        /* La clave vale, pero sin sedes no hay panel que enseñar */
+        panelKey = '';
+        accesoError.textContent = 'Esta marca no tiene sedes configuradas.';
+        return false;
+      }
+
+      sedes = res.sedes;
+      TOKEN = sedeInicial();
+      guardarSede(TOKEN);
+      pintarSedes();
+
+      sesionAbierta(clave);
+      return cargarDia(diaSel).then(function () { return true; });
+    });
+  }
+
   function entrar(clave) {
     panelKey = clave;
 
+    if (GRUPO) return entrarMarca(clave);
+
     return api('panel_listar', { fecha: diaSel }).then(function (res) {
       if (res && res.ok) {
-        try { window.sessionStorage.setItem(CLAVE_GUARDADA, clave); } catch (e) {}
-
-        acceso.hidden = true;
-        accesoError.textContent = '';
-
-        reservas = res.reservas || [];
-        mesas    = res.mesas || [];
-        config   = res.config || {};
-
-        pintarZonasAlta();
-        pintar();
+        sesionAbierta(clave);
+        volcar(res);
         return true;
       }
 
-      panelKey = '';
-      if (res && res.error === 'sin_red') accesoError.textContent = 'Sin conexión. Inténtalo otra vez.';
-      else accesoError.textContent = 'Clave incorrecta.';
-      return false;
+      return accesoFallido(res);
     });
   }
 
