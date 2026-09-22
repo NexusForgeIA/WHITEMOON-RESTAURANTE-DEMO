@@ -22,9 +22,15 @@
   /* En reserva.html el reservador ES la página: ni botón flotante ni cerrar */
   var modoPagina = panel.getAttribute('data-modo') === 'pagina';
 
+  /* Marca con varios locales bajo una sola web. Vacío = un restaurante y el
+     reservador se comporta igual que siempre, sin preguntar el local. */
+  var GRUPO = panel.getAttribute('data-grupo') || '';
+
   var API    = 'https://mlaqtniujnvfxcvcourm.supabase.co/functions/v1/reservas-mt';
-  var TOKEN  = 'demo-restaurante';
   var ESPERA = 15000;
+
+  /* Deja de ser constante en modo marca: lo reescribe la sede elegida */
+  var TOKEN = 'demo-restaurante';
 
   var DIAS  = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
   var DOWS  = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];   /* el calendario empieza en lunes */
@@ -46,6 +52,10 @@
   var reserva = nueva();
   var enviando = false;
   var timers = [];
+
+  /* Las sedes se piden una vez y se guardan: "empezar de nuevo" no refetchea */
+  var sedes = null;
+  var sedeActiva = null;
 
   function nueva() {
     return {
@@ -168,6 +178,92 @@
     return d.getFullYear() === new Date().getFullYear() ? txt : txt + ' de ' + d.getFullYear();
   }
 
+  /* --- paso 0: el local ----------------------------------------------------
+     Solo en modo marca. Sin sede elegida no se puede reservar: crear_reserva
+     necesita el tenant, así que este paso no se puede saltar.
+     -------------------------------------------------------------------- */
+
+  function etiquetaSede(s) {
+    return s.ciudad || s.restaurante_nombre || s.tenant;
+  }
+
+  function pedirSedes(cuando) {
+    if (sedes) { cuando(sedes); return; }
+
+    var contestado = false;
+
+    var responder = function (lista) {
+      if (contestado) return;
+      contestado = true;
+      cuando(lista);
+    };
+
+    var reloj = setTimeout(function () { responder(null); }, ESPERA);
+
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'sedes_publicas', grupo: GRUPO })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (datos) {
+        clearTimeout(reloj);
+
+        if (datos && datos.ok && datos.sedes && datos.sedes.length) {
+          sedes = datos.sedes;
+          responder(sedes);
+          return;
+        }
+
+        responder(null);
+      })
+      .catch(function () { clearTimeout(reloj); responder(null); });
+  }
+
+  function pasoSede() {
+    if (sedes) { ofrecerSedes(sedes); return; }
+
+    var t = escribiendo();
+
+    pedirSedes(function (lista) {
+      t.remove();
+
+      if (!lista) { sedesFallidas(); return; }
+      ofrecerSedes(lista);
+    });
+  }
+
+  /* Con un solo local no hay nada que preguntar */
+  function ofrecerSedes(lista) {
+    if (lista.length === 1) { elegirSede(lista[0]); return; }
+
+    bot(['¿En qué local quieres reservar?'], function () {
+      pintarChips(lista.map(function (s) {
+        return {
+          texto: etiquetaSede(s),
+          accion: function () { elegirSede(s); }
+        };
+      }));
+    });
+  }
+
+  function elegirSede(s) {
+    TOKEN = s.tenant;
+    sedeActiva = s;
+    pasoDia();
+  }
+
+  function sedesFallidas() {
+    bot([
+      'No he podido cargar los locales, inténtalo en un momento.',
+      'Si tienes prisa, llámanos al 910 00 00 00 y la cogemos por teléfono.'
+    ], function () {
+      pintarChips([
+        { texto: 'Reintentar', eco: false, accion: pasoSede }
+      ]);
+    });
+  }
+
   /* --- paso 1: el día ----------------------------------------------------- */
 
   function pasoDia() {
@@ -287,12 +383,21 @@
 
   /* --- paso 2: turno ------------------------------------------------------ */
 
+  /* Los turnos del local; sin sede, los dos de siempre */
+  function turnosDisponibles() {
+    if (sedeActiva && sedeActiva.turnos && sedeActiva.turnos.length) return sedeActiva.turnos;
+    return [{ nombre: 'comida' }, { nombre: 'cena' }];
+  }
+
+  function capitaliza(txt) {
+    return txt.charAt(0).toUpperCase() + txt.slice(1);
+  }
+
   function pasoTurno() {
     bot(['¿Comida o cena?'], function () {
-      pintarChips([
-        { texto: 'Comida', accion: elegirTurno },
-        { texto: 'Cena',   accion: elegirTurno }
-      ]);
+      pintarChips(turnosDisponibles().map(function (t) {
+        return { texto: capitaliza(t.nombre), accion: elegirTurno };
+      }));
     });
   }
 
@@ -305,9 +410,50 @@
 
   /* --- paso 3: hora ------------------------------------------------------- */
 
+  /* El servidor manda el turno como rango (13:00–16:00), no como lista de
+     huecos. Se pasa todo a minutos porque "24:00" ni lo da Date ni ordena
+     bien como texto, y no se ofrece la hora de cierre. */
+  var PASO_HORA = 30;
+
+  function aMinutos(hhmm) {
+    var trozos = String(hhmm || '').split(':');
+    return Number(trozos[0]) * 60 + Number(trozos[1] || 0);
+  }
+
+  function aHora(minutos) {
+    var h = Math.floor(minutos / 60) % 24;
+    var m = minutos % 60;
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+  }
+
+  function huecos(turno) {
+    var lista = [];
+    var fin = aMinutos(turno.hora_fin) - PASO_HORA;
+
+    for (var m = aMinutos(turno.hora_ini); m <= fin; m += PASO_HORA) lista.push(aHora(m));
+    return lista;
+  }
+
+  function horasDelTurno() {
+    var turno = null;
+
+    if (sedeActiva && sedeActiva.turnos) {
+      sedeActiva.turnos.forEach(function (t) {
+        if (t.nombre === reserva.turno) turno = t;
+      });
+    }
+
+    if (turno && turno.hora_ini && turno.hora_fin) {
+      var propias = huecos(turno);
+      if (propias.length) return propias;
+    }
+
+    return HORAS[reserva.turno] || [];
+  }
+
   function pasoHora() {
     bot(['¿A qué hora?'], function () {
-      pintarChips(HORAS[reserva.turno].map(function (h) {
+      pintarChips(horasDelTurno().map(function (h) {
         return { texto: h, accion: elegirHora };
       }));
     });
@@ -320,9 +466,15 @@
 
   /* --- paso 4: zona ------------------------------------------------------- */
 
+  /* Las zonas del local; sin sede, las de siempre */
+  function zonasDisponibles() {
+    if (sedeActiva && sedeActiva.zonas && sedeActiva.zonas.length) return sedeActiva.zonas;
+    return ZONAS;
+  }
+
   function pasoZona() {
     bot(['¿Dónde prefieres sentarte?'], function () {
-      pintarChips(ZONAS.map(function (z) {
+      pintarChips(zonasDisponibles().map(function (z) {
         return { texto: z, accion: elegirZona };
       }));
     });
@@ -408,6 +560,8 @@
       dl.appendChild(el('dd', null, valor));
     }
 
+    /* Sin sede no se pinta la fila: fila() se salta los valores vacíos */
+    fila('Local', sedeActiva ? etiquetaSede(sedeActiva) : '');
     fila('Día', reserva.diaTexto);
     fila('Turno', reserva.turnoTexto + ' · ' + reserva.hora);
     fila('Zona', reserva.zona);
@@ -529,9 +683,11 @@
     log.innerHTML = '';
     vaciarPie();
     reserva = nueva();
+    sedeActiva = null;
     enviando = false;
 
-    bot(['Buenas, soy el asistente de La Brasa. Te busco mesa en unos toques.'], pasoDia);
+    bot(['Buenas, soy el asistente de La Brasa. Te busco mesa en unos toques.'],
+        GRUPO ? pasoSede : pasoDia);
   }
 
   /* --- abrir / cerrar --------------------------------------------------- */
