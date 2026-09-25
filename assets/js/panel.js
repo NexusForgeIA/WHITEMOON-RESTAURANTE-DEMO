@@ -432,8 +432,9 @@
 
   /* Las zonas las manda config; se añade la propia por si no está en la lista */
   function zonas(actual) {
+    /* config.zonas llega en texto ("Interior") o en objetos ({nombre, aforo}) */
     var lista = (config.zonas && config.zonas.length)
-      ? config.zonas.slice()
+      ? config.zonas.map(function (z) { return (z && typeof z === 'object') ? String(z.nombre || '') : String(z); })
       : ['Interior', 'Ventana', 'Terraza', 'Barra'];
 
     if (actual && lista.indexOf(actual) === -1) lista.push(actual);

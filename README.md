@@ -27,6 +27,9 @@ sin backend y con datos de mentira.
 - El generador de mensaje no envía nada por su cuenta: copia el texto o abre
   wa.me / el cliente de correo para que decida el encargado.
 - La carta no lleva precios.
+- Aforo: cada turno tiene su tope de comensales. Si una zona de `reservas_config.zonas`
+  es un objeto con `aforo` > 0 (`{"nombre":"Barra","aforo":8}`), además tiene tope
+  propio por turno; en texto (`"Barra"`) o sin aforo, solo cuenta el del turno.
 
 ## Estructura
 
@@ -45,6 +48,10 @@ assets/
   js/panel.js      estado en memoria, cuadro de mando, reservas y mesas
   js/qr.js         generador de QR propio, sin dependencias
   js/site.js       solo presentación: flechas de carrusel y entrada al hacer scroll
+supabase/
+  functions/reservas-mt/index.ts   edge function multi-tenant de reservas (todas las
+                                   sedes). Se despliega a mano, no desde Pages
+  sql/                             cambios de config pendientes de aplicar
 ```
 
 `reserva.html` reutiliza `chat.js`: el mismo guion y el mismo calendario que el
