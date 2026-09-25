@@ -14,9 +14,12 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Parrilla con llamas y un corte de carne sobre las brasas, con el texto «Fuego de encina, mesa sin prisa».">
 <meta name="theme-color" content="#08080d">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='3' fill='%2308080d'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ffab2e'/%3E%3C/svg%3E">
+<link rel="preload" href="assets/fonts/sora-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/fraunces-italic-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" as="image" type="image/webp" fetchpriority="high"
+      imagesrcset="assets/img/hero-900.webp 900w, assets/img/hero.webp 1800w" imagesizes="100vw">
 <link rel="stylesheet" href="assets/css/base.css">
 <link rel="stylesheet" href="assets/css/site.css">
 <script>document.documentElement.classList.add('js');</script>
@@ -82,8 +85,8 @@
   <!-- 1 · Hero a sangre ----------------------------------------------------- -->
   <section class="hero" aria-labelledby="t-hero">
     <picture class="hero__foto">
-      <source srcset="assets/img/hero.webp" type="image/webp">
-      <img src="assets/img/hero.jpg" width="1800" height="1100" decoding="async" fetchpriority="high"
+      <source srcset="assets/img/hero-900.webp 900w, assets/img/hero.webp 1800w" sizes="100vw" type="image/webp">
+      <img src="assets/img/hero.jpg" srcset="assets/img/hero-900.jpg 900w, assets/img/hero.jpg 1800w" sizes="100vw" width="1800" height="1100" decoding="async" fetchpriority="high"
            alt="Parrilla de hierro con llamas altas y un corte de carne dorándose sobre las brasas.">
     </picture>
 
@@ -144,8 +147,8 @@
     <ul class="carrusel carrusel--4" id="carrusel-carta" tabindex="0" aria-label="Nuestra carta">
       <li class="tarjeta reveal">
         <picture>
-          <source srcset="assets/img/carta-brasa.webp" type="image/webp">
-          <img src="assets/img/carta-brasa.jpg" width="900" height="1125" loading="lazy" decoding="async"
+          <source srcset="assets/img/carta-brasa-600.webp 600w, assets/img/carta-brasa.webp 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" type="image/webp">
+          <img src="assets/img/carta-brasa.jpg" srcset="assets/img/carta-brasa-600.jpg 600w, assets/img/carta-brasa.jpg 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" width="900" height="1125" loading="lazy" decoding="async"
                alt="Cortes de carne marcándose sobre una parrilla de carbón.">
         </picture>
         <h3>A la carta</h3>
@@ -153,8 +156,8 @@
       </li>
       <li class="tarjeta reveal">
         <picture>
-          <source srcset="assets/img/carta-bodega.webp" type="image/webp">
-          <img src="assets/img/carta-bodega.jpg" width="900" height="1125" loading="lazy" decoding="async"
+          <source srcset="assets/img/carta-bodega-600.webp 600w, assets/img/carta-bodega.webp 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" type="image/webp">
+          <img src="assets/img/carta-bodega.jpg" srcset="assets/img/carta-bodega-600.jpg 600w, assets/img/carta-bodega.jpg 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" width="900" height="1125" loading="lazy" decoding="async"
                alt="Botellero de madera iluminado desde detrás, lleno de botellas de vino.">
         </picture>
         <h3>Bodega</h3>
@@ -162,8 +165,8 @@
       </li>
       <li class="tarjeta reveal">
         <picture>
-          <source srcset="assets/img/carta-cocteles.webp" type="image/webp">
-          <img src="assets/img/carta-cocteles.jpg" width="900" height="1125" loading="lazy" decoding="async"
+          <source srcset="assets/img/carta-cocteles-600.webp 600w, assets/img/carta-cocteles.webp 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" type="image/webp">
+          <img src="assets/img/carta-cocteles.jpg" srcset="assets/img/carta-cocteles-600.jpg 600w, assets/img/carta-cocteles.jpg 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" width="900" height="1125" loading="lazy" decoding="async"
                alt="Vaso tallado con un cóctel ámbar y media naranja sobre la barra en penumbra.">
         </picture>
         <h3>Cócteles</h3>
@@ -171,8 +174,8 @@
       </li>
       <li class="tarjeta reveal">
         <picture>
-          <source srcset="assets/img/carta-brunch.webp" type="image/webp">
-          <img src="assets/img/carta-brunch.jpg" width="900" height="1125" loading="lazy" decoding="async"
+          <source srcset="assets/img/carta-brunch-600.webp 600w, assets/img/carta-brunch.webp 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" type="image/webp">
+          <img src="assets/img/carta-brunch.jpg" srcset="assets/img/carta-brunch-600.jpg 600w, assets/img/carta-brunch.jpg 900w" sizes="(min-width: 1100px) 24vw, (min-width: 600px) 46vw, 78vw" width="900" height="1125" loading="lazy" decoding="async"
                alt="Bandejas con pescado curado, fruta y tostas sobre una mesa de madera.">
         </picture>
         <h3>Brunch</h3>
@@ -199,8 +202,8 @@
       <div class="grupos">
         <article class="grupo grupo--mayor reveal">
           <picture>
-            <source srcset="assets/img/grupo-sala.webp" type="image/webp">
-            <img src="assets/img/grupo-sala.jpg" width="1100" height="825" loading="lazy" decoding="async"
+            <source srcset="assets/img/grupo-sala-600.webp 600w, assets/img/grupo-sala.webp 1100w" sizes="(min-width: 900px) 55vw, 94vw" type="image/webp">
+            <img src="assets/img/grupo-sala.jpg" srcset="assets/img/grupo-sala-600.jpg 600w, assets/img/grupo-sala.jpg 1100w" sizes="(min-width: 900px) 55vw, 94vw" width="1100" height="825" loading="lazy" decoding="async"
                  alt="Sala del restaurante en penumbra, con apliques encendidos y mesas vacías.">
           </picture>
           <div class="grupo__txt">
@@ -211,8 +214,8 @@
         </article>
         <article class="grupo reveal">
           <picture>
-            <source srcset="assets/img/grupo-reservado.webp" type="image/webp">
-            <img src="assets/img/grupo-reservado.jpg" width="1100" height="825" loading="lazy" decoding="async"
+            <source srcset="assets/img/grupo-reservado-600.webp 600w, assets/img/grupo-reservado.webp 1100w" sizes="(min-width: 900px) 22vw, 94vw" type="image/webp">
+            <img src="assets/img/grupo-reservado.jpg" srcset="assets/img/grupo-reservado-600.jpg 600w, assets/img/grupo-reservado.jpg 1100w" sizes="(min-width: 900px) 22vw, 94vw" width="1100" height="825" loading="lazy" decoding="async"
                  alt="Sillas de madera oscura junto a una mesa, en una sala de paredes de piedra.">
           </picture>
           <div class="grupo__txt">
@@ -223,8 +226,8 @@
         </article>
         <article class="grupo reveal">
           <picture>
-            <source srcset="assets/img/grupo-exclusivo.webp" type="image/webp">
-            <img src="assets/img/grupo-exclusivo.jpg" width="1100" height="825" loading="lazy" decoding="async"
+            <source srcset="assets/img/grupo-exclusivo-600.webp 600w, assets/img/grupo-exclusivo.webp 1100w" sizes="(min-width: 900px) 22vw, 94vw" type="image/webp">
+            <img src="assets/img/grupo-exclusivo.jpg" srcset="assets/img/grupo-exclusivo-600.jpg 600w, assets/img/grupo-exclusivo.jpg 1100w" sizes="(min-width: 900px) 22vw, 94vw" width="1100" height="825" loading="lazy" decoding="async"
                  alt="Mesa de madera puesta en una sala oscura, con luces desenfocadas al fondo.">
           </picture>
           <div class="grupo__txt">
@@ -257,8 +260,8 @@
     <ul class="carrusel carrusel--exp" id="carrusel-exp" tabindex="0" aria-label="Experiencias">
       <li class="exp reveal">
         <picture>
-          <source srcset="assets/img/exp-fuego.webp" type="image/webp">
-          <img src="assets/img/exp-fuego.jpg" width="900" height="1200" loading="lazy" decoding="async"
+          <source srcset="assets/img/exp-fuego-600.webp 600w, assets/img/exp-fuego.webp 900w" sizes="(min-width: 1100px) 40vw, (min-width: 600px) 58vw, 80vw" type="image/webp">
+          <img src="assets/img/exp-fuego.jpg" srcset="assets/img/exp-fuego-600.jpg 600w, assets/img/exp-fuego.jpg 900w" sizes="(min-width: 1100px) 40vw, (min-width: 600px) 58vw, 80vw" width="900" height="1200" loading="lazy" decoding="async"
                alt="Llamas altas saliendo de una parrilla de carbón.">
         </picture>
         <div class="exp__txt">
@@ -269,8 +272,8 @@
       </li>
       <li class="exp reveal">
         <picture>
-          <source srcset="assets/img/exp-brasa.webp" type="image/webp">
-          <img src="assets/img/exp-brasa.jpg" width="900" height="1200" loading="lazy" decoding="async"
+          <source srcset="assets/img/exp-brasa-600.webp 600w, assets/img/exp-brasa.webp 900w" sizes="(min-width: 1100px) 40vw, (min-width: 600px) 58vw, 80vw" type="image/webp">
+          <img src="assets/img/exp-brasa.jpg" srcset="assets/img/exp-brasa-600.jpg 600w, assets/img/exp-brasa.jpg 900w" sizes="(min-width: 1100px) 40vw, (min-width: 600px) 58vw, 80vw" width="900" height="1200" loading="lazy" decoding="async"
                alt="Primer plano de ascuas encendidas entre la ceniza.">
         </picture>
         <div class="exp__txt">
@@ -281,8 +284,8 @@
       </li>
       <li class="exp reveal">
         <picture>
-          <source srcset="assets/img/exp-humo.webp" type="image/webp">
-          <img src="assets/img/exp-humo.jpg" width="900" height="1200" loading="lazy" decoding="async"
+          <source srcset="assets/img/exp-humo-600.webp 600w, assets/img/exp-humo.webp 900w" sizes="(min-width: 1100px) 40vw, (min-width: 600px) 58vw, 80vw" type="image/webp">
+          <img src="assets/img/exp-humo.jpg" srcset="assets/img/exp-humo-600.jpg 600w, assets/img/exp-humo.jpg 900w" sizes="(min-width: 1100px) 40vw, (min-width: 600px) 58vw, 80vw" width="900" height="1200" loading="lazy" decoding="async"
                alt="Llamarada sobre una rejilla con carne, envuelta en humo.">
         </picture>
         <div class="exp__txt">
@@ -299,8 +302,8 @@
   <section class="historia" id="historia" aria-labelledby="t-historia">
     <div class="wrap historia__grid">
       <picture class="historia__foto reveal">
-        <source srcset="assets/img/historia.webp" type="image/webp">
-        <img src="assets/img/historia.jpg" width="1100" height="1375" loading="lazy" decoding="async"
+        <source srcset="assets/img/historia-600.webp 600w, assets/img/historia.webp 1100w" sizes="(min-width: 900px) 50vw, 94vw" type="image/webp">
+        <img src="assets/img/historia.jpg" srcset="assets/img/historia-600.jpg 600w, assets/img/historia.jpg 1100w" sizes="(min-width: 900px) 50vw, 94vw" width="1100" height="1375" loading="lazy" decoding="async"
              alt="Unas pinzas levantan un chuletón marcado sobre la parrilla, con una llama debajo.">
       </picture>
       <div class="historia__txt">
@@ -423,7 +426,7 @@
   </footer>
 </section>
 
-<script src="assets/js/chat.js"></script>
-<script src="assets/js/site.js"></script>
+<script src="assets/js/chat.js" defer></script>
+<script src="assets/js/site.js" defer></script>
 </body>
 </html>

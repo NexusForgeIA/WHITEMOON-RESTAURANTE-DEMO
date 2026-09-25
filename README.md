@@ -78,7 +78,8 @@ grande y carruseles, esquinas casi rectas (≤ 4px) y mucho aire.
   detalles (líneas, puntos), texto `#f0f0f5` y secundario `#8888a0`. `site.css`
   reapunta los tokens de `base.css`, así que el panel no cambia.
 - **Tipografía**: Fraunces (display, 300/600 e itálica) para titulares y Sora
-  para el cuerpo, desde Google Fonts.
+  para el cuerpo, autohospedadas en `assets/fonts/` (woff2 variables, latin y
+  latin-ext) con `font-display: swap`; la home precarga las tres de latin.
 - **Panel** (`panel.html`): sigue con su propio look oscuro; no carga `site.css`.
 
 Todo el texto cumple AA sobre sus fondos (el mínimo es el gris secundario sobre
@@ -86,8 +87,9 @@ la tarjeta del chat: 4,98:1). El ascua no se usa como color de texto.
 
 Las fotos son de [Unsplash](https://unsplash.com) (licencia libre, sin
 personas), autoalojadas en `assets/img/` en WebP con respaldo JPG vía
-`<picture>`. Llevan `width`/`height` y `aspect-ratio` para que no haya saltos de
-maquetación. La `og:image` es un JPG de 1200×630.
+`<picture>`, y con una variante pequeña (`-600`, el hero `-900`) vía
+`srcset`/`sizes` para móvil. Llevan `width`/`height` y `aspect-ratio` para que no
+haya saltos de maquetación. La `og:image` es un JPG de 1200×630.
 
 Responsive probado a 900, 600 y 375 px sin scroll horizontal. El reservador
 (`chat.js`) no cambia: solo su CSS.
