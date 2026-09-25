@@ -256,7 +256,7 @@
   function sedesFallidas() {
     bot([
       'No he podido cargar los locales, inténtalo en un momento.',
-      'Si tienes prisa, llámanos al 910 00 00 00 y la cogemos por teléfono.'
+      'Si tienes prisa, llámanos al 643 199 580 y la cogemos por teléfono.'
     ], function () {
       pintarChips([
         { texto: 'Reintentar', eco: false, accion: pasoSede }
@@ -640,7 +640,7 @@
     bot(['¡Reserva registrada! El restaurante te la confirma enseguida.'], function () {
       tarjeta('Reserva registrada · Restaurante WhiteMoon');
 
-      bot(['Si te surge algo, llámanos al 910 00 00 00 y la movemos.'], function () {
+      bot(['Si te surge algo, llámanos al 643 199 580 y la movemos.'], function () {
         pintarChips([
           { texto: 'Hacer otra reserva', eco: false, accion: arrancar }
         ]);
@@ -667,7 +667,7 @@
   function noSeHaPodido() {
     bot([
       'No he podido registrarla, inténtalo en un momento.',
-      'Si tienes prisa, llámanos al 910 00 00 00 y la cogemos por teléfono.'
+      'Si tienes prisa, llámanos al 643 199 580 y la cogemos por teléfono.'
     ], function () {
       pintarChips([
         { texto: 'Reintentar',        eco: false, accion: confirmar },
