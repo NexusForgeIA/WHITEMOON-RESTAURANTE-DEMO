@@ -466,15 +466,114 @@
 
   /* --- paso 4: zona ------------------------------------------------------- */
 
+  /* config.zonas llega en texto ("Interior") o en objetos ({nombre, aforo}) */
+  function nombreZona(z) {
+    return (z && typeof z === 'object') ? String(z.nombre || '') : String(z);
+  }
+
   /* Las zonas del local; sin sede, las de siempre */
   function zonasDisponibles() {
-    if (sedeActiva && sedeActiva.zonas && sedeActiva.zonas.length) return sedeActiva.zonas;
+    if (sedeActiva && sedeActiva.zonas && sedeActiva.zonas.length) return sedeActiva.zonas.map(nombreZona);
     return ZONAS;
   }
 
+  /* Solo las zonas con aforo propio (> 0) tienen tope; el resto, sin límite */
+  function zonasConAforo() {
+    if (!sedeActiva || !sedeActiva.zonas) return [];
+    return sedeActiva.zonas.filter(function (z) {
+      return z && typeof z === 'object' && Number(z.aforo) > 0;
+    }).map(nombreZona);
+  }
+
+  /* Plazas libres por zona para el día y turno elegidos: { Barra: 0, ... }.
+     Solo lectura. Si no contesta, se deja la zona abierta: el tope de verdad
+     lo pone el servidor al crear la reserva. */
+  function consultarZonas(cuando) {
+    var conAforo = zonasConAforo();
+    var libres = {};
+    var pendientes = conAforo.length;
+    var contestado = false;
+
+    var responder = function () {
+      if (contestado) return;
+      contestado = true;
+      cuando(libres);
+    };
+
+    if (!pendientes) { responder(); return; }
+
+    var reloj = setTimeout(responder, ESPERA);
+
+    conAforo.forEach(function (zona) {
+      fetch(API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: TOKEN, action: 'disponibilidad',
+          fecha: reserva.fechaIso, turno: reserva.turno, zona: zona
+        })
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (datos) {
+          if (datos && datos.ok && typeof datos.disponibles_zona === 'number') {
+            libres[zona] = datos.disponibles_zona;
+          }
+        })
+        .catch(function () {})
+        .then(function () {
+          pendientes -= 1;
+          if (!pendientes) { clearTimeout(reloj); responder(); }
+        });
+    });
+  }
+
+  /* Una zona "cabe" si no tiene tope o le quedan plazas para tantos */
+  function cabe(libres, zona, personas) {
+    return !(zona in libres) || libres[zona] >= Math.max(1, personas || 0);
+  }
+
+  function listaTexto(nombres) {
+    if (nombres.length < 2) return nombres.join('');
+    return nombres.slice(0, -1).join(', ') + ' y ' + nombres[nombres.length - 1];
+  }
+
   function pasoZona() {
-    bot(['¿Dónde prefieres sentarte?'], function () {
-      pintarChips(zonasDisponibles().map(function (z) {
+    if (!zonasConAforo().length) { preguntarZona(zonasDisponibles(), []); return; }
+
+    var t = escribiendo();
+
+    consultarZonas(function (libres) {
+      t.remove();
+
+      var abiertas = zonasDisponibles().filter(function (z) { return cabe(libres, z, 1); });
+      var llenas = zonasDisponibles().filter(function (z) { return !cabe(libres, z, 1); });
+
+      if (!abiertas.length) {
+        bot([
+          'Para ese turno no queda sitio en ninguna zona.',
+          '¿Probamos con otro turno o con otro día?'
+        ], function () {
+          pintarChips([
+            { texto: 'Otro turno', eco: false, accion: pasoTurno },
+            { texto: 'Otro día',   eco: false, accion: pasoDia }
+          ]);
+        });
+        return;
+      }
+
+      preguntarZona(abiertas, llenas);
+    });
+  }
+
+  function preguntarZona(abiertas, llenas) {
+    var textos = [];
+    if (llenas.length) {
+      textos.push(listaTexto(llenas) + (llenas.length > 1 ? ' están completas' : ' está completa') + ' para ese turno.');
+    }
+    textos.push('¿Dónde prefieres sentarte?');
+
+    bot(textos, function () {
+      pintarChips(abiertas.map(function (z) {
         return { texto: z, accion: elegirZona };
       }));
     });
@@ -598,6 +697,7 @@
 
       if (res && res.ok) { registrada(); return; }
       if (res && res.motivo === 'sin_aforo') { turnoCompleto(res.disponibles); return; }
+      if (res && res.motivo === 'sin_aforo_zona') { zonaCompleta(res.zona || reserva.zona); return; }
 
       noSeHaPodido();
     });
@@ -661,6 +761,38 @@
         { texto: 'Otro turno', eco: false, accion: pasoTurno },
         { texto: 'Otro día',   eco: false, accion: pasoDia }
       ]);
+    });
+  }
+
+  /* La zona se ha llenado: se ofrecen las que tienen sitio para tantos, sin
+     volver a pedir personas ni datos, o cambiar de turno o de día */
+  function zonaCompleta(zona) {
+    var t = escribiendo();
+
+    consultarZonas(function (libres) {
+      t.remove();
+
+      var otras = zonasDisponibles().filter(function (z) {
+        return z !== zona && cabe(libres, z, reserva.personas);
+      });
+
+      var textos = ['La zona ' + zona + ' está completa para ese turno.'];
+      textos.push(otras.length
+        ? 'Hay sitio en ' + listaTexto(otras) + '. ¿Cambiamos de zona o probamos otro turno o día?'
+        : '¿Probamos con otro turno o con otro día?');
+
+      bot(textos, function () {
+        var opciones = otras.map(function (z) {
+          return {
+            texto: z,
+            accion: function () { reserva.zona = z; pasoResumen(); }
+          };
+        });
+
+        opciones.push({ texto: 'Otro turno', eco: false, accion: pasoTurno });
+        opciones.push({ texto: 'Otro día',   eco: false, accion: pasoDia });
+        pintarChips(opciones);
+      });
     });
   }
 

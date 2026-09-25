@@ -41,6 +41,22 @@ async function comensalesOcupados(tenant: string, fecha: string, turno: string):
     .reduce((s: number, r: any) => s + (Number(r.personas) || 0), 0);
 }
 
+// Aforo propio de una zona. Acepta config.zonas en texto (["Interior"]) o en objetos
+// ([{nombre:"Interior",aforo:24}]). Texto, sin aforo o aforo<=0 = 0 = sin limite propio:
+// la zona se rige solo por el aforo del turno.
+function aforoDeZona(config: any, zona: string): number {
+  const z = (config?.zonas || []).find((x: any) => x && typeof x === "object" && x.nombre === zona);
+  const n = z ? Number(z.aforo) || 0 : 0;
+  return n > 0 ? n : 0;
+}
+
+async function comensalesOcupadosZona(tenant: string, fecha: string, turno: string, zona: string): Promise<number> {
+  const { data } = await supabase.from("reservas")
+    .select("personas,estado").eq("tenant", tenant).eq("fecha", fecha).eq("turno", turno).eq("zona_preferida", zona);
+  return (data || []).filter((r: any) => ESTADOS_OCUPAN.includes(r.estado))
+    .reduce((s: number, r: any) => s + (Number(r.personas) || 0), 0);
+}
+
 // Clave de grupo (marca): demo si el grupo acaba en -demo, si no via Secret RESERVAS_PANEL_KEY_GRUPO_<GRUPO>
 function grupoKeyOK(grupo: string, key: string): boolean {
   if (!grupo || !key) return false;
@@ -122,6 +138,15 @@ Deno.serve(async (req: Request) => {
       const aforo = aforoDeTurno(config, turno);
       const ocup = await comensalesOcupados(tenant, fecha, turno);
       const disponibles = aforo > 0 ? Math.max(0, aforo - ocup) : null;
+      const zona = body.zona ? String(body.zona) : "";
+      const aforoZona = zona ? aforoDeZona(config, zona) : 0;
+      if (aforoZona > 0) {
+        const ocupZona = await comensalesOcupadosZona(tenant, fecha, turno, zona);
+        return json({
+          ok: true, aforo, ocupados: ocup, disponibles,
+          zona, aforo_zona: aforoZona, ocupados_zona: ocupZona, disponibles_zona: Math.max(0, aforoZona - ocupZona),
+        });
+      }
       return json({ ok: true, aforo, ocupados: ocup, disponibles });
     }
 
@@ -137,6 +162,14 @@ Deno.serve(async (req: Request) => {
       if (aforo > 0) {
         const ocup = await comensalesOcupados(tenant, fecha, turno);
         if (ocup + p > aforo) return json({ ok: false, motivo: "sin_aforo", disponibles: Math.max(0, aforo - ocup) });
+      }
+      const zona = zona_preferida ? String(zona_preferida) : "";
+      const aforoZona = zona ? aforoDeZona(config, zona) : 0;
+      if (aforoZona > 0) {
+        const ocupZona = await comensalesOcupadosZona(tenant, fecha, turno, zona);
+        if (ocupZona + p > aforoZona) {
+          return json({ ok: false, motivo: "sin_aforo_zona", zona, disponibles_zona: Math.max(0, aforoZona - ocupZona) });
+        }
       }
       const estado = config?.auto_confirmar ? "confirmada" : "pendiente";
       const { data, error } = await supabase.from("reservas").insert({
