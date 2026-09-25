@@ -12,13 +12,14 @@
 <meta property="og:image" content="assets/img/og.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Sala del Restaurante WhiteMoon con ventanales altos, mesas de madera y una pared de plantas.">
-<meta name="theme-color" content="#ffffff">
+<meta property="og:image:alt" content="Parrilla con llamas y un corte de carne sobre las brasas, con el texto «Fuego de encina, mesa sin prisa».">
+<meta name="theme-color" content="#08080d">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/css/base.css">
 <link rel="stylesheet" href="assets/css/site.css">
+<script>document.documentElement.classList.add('js');</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -35,7 +36,8 @@
     "addressRegion": "Madrid",
     "addressCountry": "ES"
   },
-  "telephone": "+34910000000",
+  "telephone": "+34643199580",
+  "email": "comercial@whitemoon.es",
   "openingHoursSpecification": [
     {
       "@type": "OpeningHoursSpecification",
@@ -60,168 +62,300 @@
 
 <header class="nav">
   <div class="wrap nav__inner">
-    <a class="brand" href="#main">
-      <span class="brand__mark">Restaurante <em>WhiteMoon</em></span>
-      <span class="brand__kind">Majadahonda</span>
+    <a class="brand" href="#main" aria-label="Restaurante WhiteMoon, inicio">
+      <span class="brand__kicker">Restaurante</span>
+      <span class="brand__mark">WhiteMoon</span>
     </a>
     <nav class="nav__links" aria-label="Secciones">
-      <a href="#sitio">El sitio</a>
-      <a href="#carta">La carta</a>
-      <a href="#reservar">Reservar</a>
+      <a href="#carta">Carta</a>
+      <a href="#grupos">Grupos</a>
+      <a href="#historia">Historia</a>
+      <a href="#contacto">Contacto</a>
     </nav>
-    <span class="demo-tag">Demo<span class="nav__tag-full"> · restaurante ficticio</span></span>
+    <span class="demo-tag">Demo</span>
+    <button class="btn btn--ember nav__cta" type="button" data-open-chat>Reservar</button>
   </div>
 </header>
 
 <main id="main">
 
-  <section class="hero">
+  <!-- 1 · Hero a sangre ----------------------------------------------------- -->
+  <section class="hero" aria-labelledby="t-hero">
     <picture class="hero__foto">
       <source srcset="assets/img/hero.webp" type="image/webp">
-      <img src="assets/img/hero.jpg" width="1600" height="900" decoding="async" fetchpriority="high"
-           alt="Sala del restaurante con ventanales altos, mesas de madera y una pared llena de plantas.">
+      <img src="assets/img/hero.jpg" width="1800" height="1100" decoding="async" fetchpriority="high"
+           alt="Parrilla de hierro con llamas altas y un corte de carne dorándose sobre las brasas.">
     </picture>
 
     <div class="wrap hero__inner">
-      <h1>Encina, sal gorda y <em>la mesa puesta</em> cuando llegas.</h1>
+      <p class="eyebrow">Parrilla de brasa · Majadahonda</p>
+      <h1 id="t-hero">Fuego de encina, <em>mesa sin&nbsp;prisa.</em></h1>
       <p class="hero__lead">
-        Parrilla de leña en el centro de Majadahonda. Cuarenta comensales, dos turnos
-        y sobremesa sin prisa. La reserva la coge el asistente, a cualquier hora.
+        Carne madurada, pescado entero y verdura al rescoldo, en una sala en penumbra
+        para cuarenta comensales. La mesa la coge el asistente, a cualquier hora.
       </p>
       <div class="hero__actions">
-        <button class="btn btn--ember" type="button" data-open-chat>Reservar mesa</button>
-        <a class="btn btn--ghost" href="#carta">Ver la carta</a>
+        <button class="btn btn--ember btn--lg" type="button" data-open-chat>Reserva una mesa</button>
+        <a class="btn btn--ghost btn--lg" href="#carta">Ver la carta</a>
       </div>
+    </div>
 
-      <dl class="strip">
-        <div>
-          <dt>Dónde</dt>
-          <dd>Calle del Olivar 12 <span>28220 Majadahonda, Madrid</span></dd>
-        </div>
-        <div>
-          <dt>Teléfono</dt>
-          <dd>910 00 00 00 <span>Número de ejemplo</span></dd>
-        </div>
-        <div>
-          <dt>Horario</dt>
-          <dd>13:00 – 16:00 · 20:00 – 23:30 <span>Cerrado los lunes</span></dd>
-        </div>
-        <div>
-          <dt>Reservas</dt>
-          <dd>Por el chat, 24 h <span>Asistente IA · demo</span></dd>
-        </div>
+    <dl class="wrap hero__datos">
+      <div><dt>Horario</dt><dd>Mar–dom · 13:00–16:00 · 20:00–23:30</dd></div>
+      <div><dt>Dónde</dt><dd>Calle del Olivar 12, Majadahonda</dd></div>
+      <div><dt>Reservas</dt><dd>Asistente · demo, 24 h</dd></div>
+    </dl>
+  </section>
+
+  <!-- 2 · Intro editorial --------------------------------------------------- -->
+  <section class="intro" aria-labelledby="t-intro">
+    <div class="wrap intro__grid">
+      <p class="intro__label reveal" id="t-intro">La casa</p>
+      <p class="intro__texto reveal">
+        Aquí manda el fuego. La encina se enciende por la mañana y se trabaja hasta que
+        sale el último plato: producto con tiempo, brasa viva y
+        <em>una sala hecha para quedarse</em> a la sobremesa.
+      </p>
+      <dl class="cifras">
+        <div class="reveal"><dt>11:00</dt><dd>Se enciende la parrilla, cada día que abrimos.</dd></div>
+        <div class="reveal"><dt>45</dt><dd>Días de maduración para la vaca que va a la piedra.</dd></div>
+        <div class="reveal"><dt>40</dt><dd>Comensales en sala, y doce más en la terraza de atrás.</dd></div>
       </dl>
     </div>
   </section>
 
-  <section class="section" id="sitio">
-    <div class="wrap sitio">
+  <!-- 3 · Nuestra carta ----------------------------------------------------- -->
+  <section class="bloque" id="carta" aria-labelledby="t-carta">
+    <div class="wrap bloque__head">
       <div>
-        <h2>Una parrilla, no una carta larga</h2>
-        <p class="section__lead">
-          El fuego manda: se enciende a las once y se apaga cuando sale el último
-          chuletón. Lo demás —el pan, el tomate, el vino de la casa— acompaña.
-          Sala pequeña, mantel de tela y ruido justo para hablar.
+        <p class="eyebrow">01 · Nuestra carta</p>
+        <h2 id="t-carta">Cuatro maneras de <em>sentarse a la mesa</em></h2>
+      </div>
+      <div class="carrusel__nav">
+        <button class="carrusel__btn" type="button" data-carrusel="carta" data-dir="-1" aria-label="Anterior">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4L6 9l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+        </button>
+        <button class="carrusel__btn" type="button" data-carrusel="carta" data-dir="1" aria-label="Siguiente">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <ul class="carrusel carrusel--4" id="carrusel-carta" tabindex="0" aria-label="Nuestra carta">
+      <li class="tarjeta reveal">
+        <picture>
+          <source srcset="assets/img/carta-brasa.webp" type="image/webp">
+          <img src="assets/img/carta-brasa.jpg" width="900" height="1125" loading="lazy" decoding="async"
+               alt="Cortes de carne marcándose sobre una parrilla de carbón.">
+        </picture>
+        <h3>A la carta</h3>
+        <p>Brasa, temporada y mercado. Chuletón madurado, pescado entero a la parrilla y verdura al rescoldo; la pizarra cambia con lo que llega.</p>
+      </li>
+      <li class="tarjeta reveal">
+        <picture>
+          <source srcset="assets/img/carta-bodega.webp" type="image/webp">
+          <img src="assets/img/carta-bodega.jpg" width="900" height="1125" loading="lazy" decoding="async"
+               alt="Botellero de madera iluminado desde detrás, lleno de botellas de vino.">
+        </picture>
+        <h3>Bodega</h3>
+        <p>Una pared de botellas pensada para la parrilla: tintos con estructura, blancos con crianza y algún vino de pueblo que merece la pena.</p>
+      </li>
+      <li class="tarjeta reveal">
+        <picture>
+          <source srcset="assets/img/carta-cocteles.webp" type="image/webp">
+          <img src="assets/img/carta-cocteles.jpg" width="900" height="1125" loading="lazy" decoding="async"
+               alt="Vaso tallado con un cóctel ámbar y media naranja sobre la barra en penumbra.">
+        </picture>
+        <h3>Cócteles</h3>
+        <p>Clásicos bien hechos y alguno de la casa: cítricos, ahumados suaves y vermut antes de pasar a la mesa.</p>
+      </li>
+      <li class="tarjeta reveal">
+        <picture>
+          <source srcset="assets/img/carta-brunch.webp" type="image/webp">
+          <img src="assets/img/carta-brunch.jpg" width="900" height="1125" loading="lazy" decoding="async"
+               alt="Bandejas con pescado curado, fruta y tostas sobre una mesa de madera.">
+        </picture>
+        <h3>Brunch</h3>
+        <p>Sábados y domingos a mediodía: pescados curados, panes de masa madre, huevos y fruta. Sin prisa y con café de verdad.</p>
+      </li>
+    </ul>
+    <p class="wrap nota">Carta de ejemplo para la demo. Sin precios: en la web real los pone el restaurante.</p>
+  </section>
+
+  <!-- 4 · Grupos y eventos -------------------------------------------------- -->
+  <section class="bloque bloque--alt" id="grupos" aria-labelledby="t-grupos">
+    <div class="wrap">
+      <div class="bloque__head">
+        <div>
+          <p class="eyebrow">02 · Grupos y eventos</p>
+          <h2 id="t-grupos">Cuando la mesa <em>se queda corta</em></h2>
+        </div>
+        <p class="bloque__lead">
+          Comidas de empresa, cumpleaños o una cena que no cabe en cuatro sillas.
+          Cuéntaselo al asistente y el equipo te llama para cerrarlo.
         </p>
       </div>
-      <dl class="facts">
-        <div>
-          <dt>Leña</dt>
-          <dd>Encina del sur de Ávila, brasa viva de once de la mañana a medianoche.</dd>
+
+      <div class="grupos">
+        <article class="grupo grupo--mayor reveal">
+          <picture>
+            <source srcset="assets/img/grupo-sala.webp" type="image/webp">
+            <img src="assets/img/grupo-sala.jpg" width="1100" height="825" loading="lazy" decoding="async"
+                 alt="Sala del restaurante en penumbra, con apliques encendidos y mesas vacías.">
+          </picture>
+          <div class="grupo__txt">
+            <h3>Grupos</h3>
+            <p>Mesas para grupos en la sala principal, con menú cerrado a elegir entre las propuestas de la casa y los tiempos de la cocina a vuestro ritmo.</p>
+            <button class="enlace" type="button" data-open-chat>Consultar disponibilidad</button>
+          </div>
+        </article>
+        <article class="grupo reveal">
+          <picture>
+            <source srcset="assets/img/grupo-reservado.webp" type="image/webp">
+            <img src="assets/img/grupo-reservado.jpg" width="1100" height="825" loading="lazy" decoding="async"
+                 alt="Sillas de madera oscura junto a una mesa, en una sala de paredes de piedra.">
+          </picture>
+          <div class="grupo__txt">
+            <h3>Reservado</h3>
+            <p>Una sala aparte con mesa larga y servicio propio. Para reuniones que piden intimidad.</p>
+            <button class="enlace" type="button" data-open-chat>Consultar disponibilidad</button>
+          </div>
+        </article>
+        <article class="grupo reveal">
+          <picture>
+            <source srcset="assets/img/grupo-exclusivo.webp" type="image/webp">
+            <img src="assets/img/grupo-exclusivo.jpg" width="1100" height="825" loading="lazy" decoding="async"
+                 alt="Mesa de madera puesta en una sala oscura, con luces desenfocadas al fondo.">
+          </picture>
+          <div class="grupo__txt">
+            <h3>Uso exclusivo</h3>
+            <p>El restaurante entero para vosotros. El menú y el ritmo de la noche se diseñan con el equipo.</p>
+            <button class="enlace" type="button" data-open-chat>Consultar disponibilidad</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · Experiencias ------------------------------------------------------ -->
+  <section class="bloque" id="experiencias" aria-labelledby="t-exp">
+    <div class="wrap bloque__head">
+      <div>
+        <p class="eyebrow">03 · Experiencias</p>
+        <h2 id="t-exp">Tres menús <em>alrededor del fuego</em></h2>
+      </div>
+      <div class="carrusel__nav">
+        <button class="carrusel__btn" type="button" data-carrusel="exp" data-dir="-1" aria-label="Anterior">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M11 4L6 9l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+        </button>
+        <button class="carrusel__btn" type="button" data-carrusel="exp" data-dir="1" aria-label="Siguiente">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="square"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <ul class="carrusel carrusel--exp" id="carrusel-exp" tabindex="0" aria-label="Experiencias">
+      <li class="exp reveal">
+        <picture>
+          <source srcset="assets/img/exp-fuego.webp" type="image/webp">
+          <img src="assets/img/exp-fuego.jpg" width="900" height="1200" loading="lazy" decoding="async"
+               alt="Llamas altas saliendo de una parrilla de carbón.">
+        </picture>
+        <div class="exp__txt">
+          <span class="exp__num" aria-hidden="true">01</span>
+          <h3>Experiencia Fuego</h3>
+          <p>Menú degustación en cinco pases, de la verdura al rescoldo a la carne madurada, terminados al momento.</p>
         </div>
-        <div>
-          <dt>Aforo</dt>
-          <dd>40 comensales en sala, 12 en la terraza de atrás cuando acompaña el tiempo.</dd>
+      </li>
+      <li class="exp reveal">
+        <picture>
+          <source srcset="assets/img/exp-brasa.webp" type="image/webp">
+          <img src="assets/img/exp-brasa.jpg" width="900" height="1200" loading="lazy" decoding="async"
+               alt="Primer plano de ascuas encendidas entre la ceniza.">
+        </picture>
+        <div class="exp__txt">
+          <span class="exp__num" aria-hidden="true">02</span>
+          <h3>Experiencia Brasa</h3>
+          <p>Para compartir en el centro: entrantes de la casa, un corte grande a la piedra y guarniciones de temporada.</p>
         </div>
-        <div>
-          <dt>Turnos</dt>
-          <dd>Comida a las 13:30 y 14:30. Cena a las 20:30 y 21:30, sin levantar mesa.</dd>
+      </li>
+      <li class="exp reveal">
+        <picture>
+          <source srcset="assets/img/exp-humo.webp" type="image/webp">
+          <img src="assets/img/exp-humo.jpg" width="900" height="1200" loading="lazy" decoding="async"
+               alt="Llamarada sobre una rejilla con carne, envuelta en humo.">
+        </picture>
+        <div class="exp__txt">
+          <span class="exp__num" aria-hidden="true">03</span>
+          <h3>Experiencia Humo</h3>
+          <p>Pases ahumados en frío y en caliente, acompañados de vinos de la bodega. Solo en cenas y con reserva previa.</p>
         </div>
-        <div>
-          <dt>Grupos</dt>
-          <dd>Hasta 10 personas por mesa. Por encima, lo hablamos por teléfono.</dd>
+      </li>
+    </ul>
+    <p class="wrap nota">Menús de ejemplo para la demo. Sin precios.</p>
+  </section>
+
+  <!-- 6 · Historia ---------------------------------------------------------- -->
+  <section class="historia" id="historia" aria-labelledby="t-historia">
+    <div class="wrap historia__grid">
+      <picture class="historia__foto reveal">
+        <source srcset="assets/img/historia.webp" type="image/webp">
+        <img src="assets/img/historia.jpg" width="1100" height="1375" loading="lazy" decoding="async"
+             alt="Unas pinzas levantan un chuletón marcado sobre la parrilla, con una llama debajo.">
+      </picture>
+      <div class="historia__txt">
+        <span class="fantasma" aria-hidden="true">Encina</span>
+        <p class="eyebrow">04 · Historia</p>
+        <h2 id="t-historia">Una parrilla, <em>no una carta larga</em></h2>
+        <p>
+          La casa nació de una idea sencilla: cocinar con encina, comprar cerca y no
+          correr. Pocas elaboraciones, bien hechas, y un fuego que se cuida como a uno
+          más del equipo.
+        </p>
+        <p>
+          Lo demás acompaña: el pan del obrador de la esquina, el tomate cuando es su
+          tiempo y el vino que pide cada corte. Mantel de tela, sala en penumbra y
+          ruido justo para hablar.
+        </p>
+        <button class="btn btn--ghost" type="button" data-open-chat>Reserva una mesa</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · Contacto ---------------------------------------------------------- -->
+  <section class="bloque bloque--alt contacto" id="contacto" aria-labelledby="t-contacto">
+    <div class="wrap">
+      <p class="eyebrow">05 · Contacto</p>
+      <h2 id="t-contacto">Te esperamos <em>junto al fuego</em></h2>
+
+      <dl class="contacto__grid">
+        <div class="reveal">
+          <dt>Dónde</dt>
+          <dd>Calle del Olivar 12<br>28220 Majadahonda, Madrid</dd>
+          <dd class="contacto__nota">Dirección de ejemplo</dd>
+        </div>
+        <div class="reveal">
+          <dt>Horario</dt>
+          <dd>Martes a domingo<br>13:00 – 16:00 · 20:00 – 23:30</dd>
+          <dd class="contacto__nota">Lunes cerrado</dd>
+        </div>
+        <div class="reveal">
+          <dt>Contacto de la demo</dt>
+          <dd>
+            <a href="tel:+34643199580">643 199 580</a><br>
+            <a href="https://wa.me/34643199580" rel="noopener" target="_blank">WhatsApp</a> ·
+            <a href="mailto:comercial@whitemoon.es">comercial@whitemoon.es</a>
+          </dd>
+          <dd class="contacto__nota">Lo atiende WhiteMoon</dd>
         </div>
       </dl>
-    </div>
-  </section>
 
-  <section class="section" id="fotos" aria-labelledby="t-fotos">
-    <div class="wrap">
-      <h2 id="t-fotos">El sitio, por dentro</h2>
-      <p class="section__lead">
-        Fotos de ambiente para la demo. El restaurante es ficticio.
-      </p>
-
-      <div class="fotos">
-        <figure>
-          <img src="assets/img/mesa.jpg" width="1200" height="900" loading="lazy" decoding="async"
-               alt="Mesa redonda puesta con copas de vino, platos y servilletas de tela.">
-          <figcaption>Mantel de tela, copas puestas y sitio para la sobremesa.</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/img/cocina.jpg" width="1200" height="900" loading="lazy" decoding="async"
-               alt="Cocina profesional vacía, con los cucharones colgados sobre el pase.">
-          <figcaption>La cocina, antes de que se encienda la parrilla.</figcaption>
-        </figure>
-        <figure>
-          <img src="assets/img/plato.jpg" width="1200" height="900" loading="lazy" decoding="async"
-               alt="Plato blanco emplatado sobre una mesa de madera clara.">
-          <figcaption>La carta cambia con lo que llega al mercado.</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
-
-  <section class="section" id="carta">
-    <div class="wrap">
-      <h2>La carta, en corto</h2>
-      <p class="section__lead">
-        Cambia con lo que llega al mercado. Esto es lo que casi siempre está.
-      </p>
-
-      <div class="carta">
-        <div>
-          <h3>Para empezar</h3>
-          <ul>
-            <li><b>Pimientos de cristal</b><span>A la brasa, con ajo confitado y aceite de arbequina.</span></li>
-            <li><b>Tomate de temporada</b><span>Con ventresca y cebolleta dulce.</span></li>
-            <li><b>Croquetas de puchero</b><span>Seis unidades, masa de dos días.</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3>De la brasa</h3>
-          <ul>
-            <li><b>Chuletón de vaca madurada</b><span>Maduración de 45 días, se sirve al punto y se termina en la piedra.</span></li>
-            <li><b>Presa ibérica</b><span>Bellota, con patata asada y pimentón de la Vera.</span></li>
-            <li><b>Rodaballo salvaje</b><span>Entero a la parrilla, refrito de ajo y vinagre.</span></li>
-            <li><b>Verduras al rescoldo</b><span>Lo que haya ese día, con romesco.</span></li>
-          </ul>
-        </div>
-        <div>
-          <h3>Para terminar</h3>
-          <ul>
-            <li><b>Torrija caramelizada</b><span>Con helado de leche merengada.</span></li>
-            <li><b>Tarta de queso</b><span>Horno alto, centro tembloroso.</span></li>
-            <li><b>Café de puchero</b><span>Y orujo de la casa si hay tiempo.</span></li>
-          </ul>
-        </div>
-      </div>
-
-      <p class="carta__note">
-        Carta de ejemplo para la demo. Sin precios: en la web real los pone el restaurante.
-      </p>
-    </div>
-  </section>
-
-  <section class="section" id="reservar">
-    <div class="wrap">
-      <div class="cierre">
-        <h2>¿Reservamos mesa?</h2>
-        <p>
-          El asistente pregunta día, personas, turno y un teléfono. Tarda menos que
-          una llamada y no da señal de ocupado a las dos y media.
+      <div class="cierre reveal">
+        <p class="cierre__txt">
+          ¿Reservamos? El asistente pregunta día, turno, zona y personas.
+          <span>Tarda menos que una llamada.</span>
         </p>
-        <button class="btn btn--ember" type="button" data-open-chat>Abrir el chat de reservas</button>
+        <button class="btn btn--ember btn--lg" type="button" data-open-chat>Reserva una mesa</button>
       </div>
     </div>
   </section>
@@ -229,17 +363,26 @@
 </main>
 
 <footer class="foot">
-  <div class="wrap">
-    <div class="foot__row">
-      <span class="brand__mark">Restaurante <em>WhiteMoon</em></span>
+  <div class="wrap foot__row">
+    <a class="brand" href="#main" aria-label="Restaurante WhiteMoon, volver arriba">
+      <span class="brand__kicker">Restaurante</span>
+      <span class="brand__mark">WhiteMoon</span>
+    </a>
+    <nav class="foot__links" aria-label="Pie">
+      <a href="#carta">Carta</a>
+      <a href="#grupos">Grupos</a>
+      <a href="#historia">Historia</a>
+      <a href="#contacto">Contacto</a>
       <a href="https://whitemoon.es" rel="noopener">WhiteMoon Agencia IA</a>
-    </div>
-    <p class="foot__disclaimer">
-      Demo de producto de WhiteMoon. «Restaurante WhiteMoon» es un negocio ficticio:
-      la dirección, el teléfono y la carta son datos de ejemplo. La reserva, en
-      cambio, es real: se guarda en el sistema del restaurante.
-      Fotos de Unsplash.
-    </p>
+    </nav>
+  </div>
+  <div class="wrap">
+  <p class="foot__disclaimer">
+    Demo de producto de WhiteMoon. «Restaurante WhiteMoon» es un negocio ficticio:
+    la dirección, la carta y los menús son datos de ejemplo, y el contacto es el de
+    la agencia. La reserva, en cambio, es real: se guarda en el sistema del restaurante.
+    Fotos de Unsplash.
+  </p>
   </div>
 </footer>
 
@@ -281,5 +424,6 @@
 </section>
 
 <script src="assets/js/chat.js"></script>
+<script src="assets/js/site.js"></script>
 </body>
 </html>

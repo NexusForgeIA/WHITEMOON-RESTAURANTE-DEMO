@@ -36,14 +36,15 @@ reserva.html
 panel.html
 assets/
   css/base.css     tokens compartidos (tipografía, espaciado, motion) y la
-                   paleta oscura, que hoy solo usa el panel
+                   paleta oscura del panel
   css/site.css     web del comensal + widget de chat + página de reserva.
-                   Redefine los tokens de color en :root con la paleta clara
+                   Redefine en :root los tokens de color (brasa) y las esquinas
   css/panel.css    panel del dueño
   img/             fotos de ambiente (WebP + JPG) y la og:image
   js/chat.js       conversación guionizada de reserva (widget y página)
   js/panel.js      estado en memoria, cuadro de mando, reservas y mesas
   js/qr.js         generador de QR propio, sin dependencias
+  js/site.js       solo presentación: flechas de carrusel y entrada al hacer scroll
 ```
 
 `reserva.html` reutiliza `chat.js`: el mismo guion y el mismo calendario que el
@@ -61,25 +62,28 @@ lo que los lectores de QR leen sin quejarse.
 
 ## Diseño
 
-Dos paletas, a propósito:
+Web pública (`index.html`, `reserva.html`) con maqueta editorial de asador:
+hero a sangre, titulares grandes en serif display, secciones amplias con foto
+grande y carruseles, esquinas casi rectas (≤ 4px) y mucho aire.
 
-- **Web pública** (`index.html`, `reserva.html`): clara. Blanco `#ffffff`, tinta
-  `#0f2436`, azul `#2563eb` para títulos y enlaces, y cálido `#e08a3c` para el
-  CTA de reservar. Los tokens viven en el `:root` de `site.css`, que reapunta
-  los de `base.css`; por eso la web es clara y el panel no.
-- **Panel** (`panel.html`): sigue oscuro (`--bg: #08080d`) con acento de brasa.
-  Es una herramienta interna y no se enseña al comensal.
+- **Paleta brasa**, en el `:root` de `site.css`: fondo `#08080d`, capas `#0e0e16`
+  y `#111118`, ámbar `#ffab2e` para CTA y acentos, ascua `#d9531e` solo para
+  detalles (líneas, puntos), texto `#f0f0f5` y secundario `#8888a0`. `site.css`
+  reapunta los tokens de `base.css`, así que el panel no cambia.
+- **Tipografía**: Fraunces (display, 300/600 e itálica) para titulares y Sora
+  para el cuerpo, desde Google Fonts.
+- **Panel** (`panel.html`): sigue con su propio look oscuro; no carga `site.css`.
 
-Todo el texto cumple contraste AA. El cálido no se usa nunca como color de
-texto sobre blanco (no llega a 4.5:1): va de fondo, con la tinta encima.
+Todo el texto cumple AA sobre sus fondos (el mínimo es el gris secundario sobre
+la tarjeta del chat: 4,98:1). El ascua no se usa como color de texto.
 
 Las fotos son de [Unsplash](https://unsplash.com) (licencia libre, sin
-personas), autoalojadas en `assets/img/` a ~1600 px y calidad 70, en WebP con
-respaldo JPG vía `<picture>`. Llevan `width`/`height` y `aspect-ratio` para que
-no haya saltos de maquetación.
+personas), autoalojadas en `assets/img/` en WebP con respaldo JPG vía
+`<picture>`. Llevan `width`/`height` y `aspect-ratio` para que no haya saltos de
+maquetación. La `og:image` es un JPG de 1200×630.
 
-Tipografía Sora. Responsive; el panel está pensado primero para móvil, con
-barra de pestañas inferior.
+Responsive probado a 900, 600 y 375 px sin scroll horizontal. El reservador
+(`chat.js`) no cambia: solo su CSS.
 
 ## Ver en local
 
